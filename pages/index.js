@@ -21,7 +21,7 @@ export default function Home() {
         <div className={styles.grid}>
           <a href="https://www.linkedin.com/in/guillermokardolus/" className={styles.card}>
             <h3>LinkedIn &rarr;</h3>
-            <p>My professional identity. Let's get connected.</p>
+            <p>Spotify, Coinbase, Pivotal, BlackRock, Gap and a few startups.</p>
           </a>
 
           <a href="https://github.com/kardolus" className={styles.card}>
