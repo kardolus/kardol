@@ -15,7 +15,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          <code className={styles.code}>Astrophysicist | Senior software engineer @ Spotify</code>
+          <code className={styles.code}>Astrophysicist / Senior software engineer @ Spotify</code>
         </p>
 
         <div className={styles.grid}>
