@@ -15,7 +15,7 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          <code className={styles.code}>Astrophysicist / Senior staff software engineer @ Cloudera</code>
+          <code className={styles.code}>Astrophysicist / Senior Staff Engineer @ Cloudera</code>
         </p>
 
         <div className={styles.grid}>
@@ -26,7 +26,7 @@ export default function Home() {
 
           <a href="https://github.com/kardolus" className={styles.card}>
             <h3>GitHub &rarr;</h3>
-            <p>Core cloud native buildpack and VMware Tanzu contributor.<br></p>
+            <p>Core cloud native buildpack and VMware Tanzu contributor.<br /><br /></p>
           </a>
 
         </div>
