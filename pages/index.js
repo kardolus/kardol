@@ -15,13 +15,13 @@ export default function Home() {
         </h1>
 
         <p className={styles.description}>
-          <code className={styles.code}>Astrophysicist / Senior software engineer @ Spotify</code>
+          <code className={styles.code}>Astrophysicist / Senior staff software engineer @ Cloudera</code>
         </p>
 
         <div className={styles.grid}>
           <a href="https://www.linkedin.com/in/guillermokardolus/" className={styles.card}>
             <h3>LinkedIn &rarr;</h3>
-            <p>Spotify, Coinbase, Pivotal, BlackRock, Gap and a few startups.</p>
+            <p>Cloudera, Spotify, Bison Trails (Coinbase), Pivotal (VMware), BlackRock, Gap and a few startups.</p>
           </a>
 
           <a href="https://github.com/kardolus" className={styles.card}>
