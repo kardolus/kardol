@@ -26,7 +26,7 @@ export default function Home() {
 
           <a href="https://github.com/kardolus" className={styles.card}>
             <h3>GitHub &rarr;</h3>
-            <p>Core cloud native buildpack and VMware Tanzu contributor.</p>
+            <p>Core cloud native buildpack and VMware Tanzu contributor.<br></p>
           </a>
 
         </div>
