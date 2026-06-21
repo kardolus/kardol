@@ -83,7 +83,7 @@
       <a href="https://github.com/kardolus/homebrew-chatgpt-cli">Homebrew</a>
     </div>
   </div>
-  <div class="flag-kpi"><div class="n">937★</div><div class="l">GitHub stars</div></div>
+  <div class="flag-kpi"><div class="n" id="stars-flag">937★</div><div class="l">GitHub stars</div></div>
 </article>
 
 <!-- PROJECTS -->
@@ -141,12 +141,12 @@
 <!-- BY THE NUMBERS -->
 <div class="section" id="numbers">By the numbers</div>
 <div class="kpis">
-  <div class="kpi"><div class="kpi-n">937★</div><div class="kpi-l">GitHub stars · chatgpt-cli</div></div>
-  <div class="kpi"><div class="kpi-n">55</div><div class="kpi-l">open-source repos</div></div>
+  <a class="kpi" href="https://github.com/kardolus/chatgpt-cli" target="_blank" rel="noopener"><div class="kpi-n" id="stars-kpi">937★</div><div class="kpi-l">GitHub stars · chatgpt-cli ↗</div></a>
+  <a class="kpi" href="https://github.com/kardolus?tab=repositories" target="_blank" rel="noopener"><div class="kpi-n" id="repos-kpi">55</div><div class="kpi-l">open-source repos ↗</div></a>
   <a class="kpi" href="https://results.nyrr.org/runner/52507628/races#ed=HALF&page=1" target="_blank" rel="noopener"><div class="kpi-n">18</div><div class="kpi-l">half-marathons · NYRR ↗</div></a>
   <!-- TODO(user): confirm/replace the playful number below -->
   <div class="kpi"><div class="kpi-n">120+</div><div class="kpi-l">loaves baked</div></div>
-  <div class="kpi"><div class="kpi-n">6</div><div class="kpi-l">years in Red Hook</div></div>
+  <div class="kpi"><div class="kpi-n" id="rh-years">6</div><div class="kpi-l">years in Red Hook</div></div>
 </div>
 
 <!-- LIFE -->
@@ -169,6 +169,25 @@
     <a href="mailto:guillermo@kardol.us">Email</a>
   </span>
 </footer>
+
+<script>
+// Live-ish stats. The hardcoded values above are the fallback; these enhance on
+// load. Public GitHub API is CORS-enabled and unauthenticated (60 req/hr per IP).
+(function(){
+  var y = document.getElementById('rh-years');           // years in Red Hook (since 2020)
+  if (y) y.textContent = String(new Date().getFullYear() - 2020);
+  function set(id, txt){ var e = document.getElementById(id); if (e && txt) e.textContent = txt; }
+  fetch('https://api.github.com/repos/kardolus/chatgpt-cli')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if (d && d.stargazers_count != null){
+      var s = d.stargazers_count.toLocaleString() + '★'; set('stars-kpi', s); set('stars-flag', s); } })
+    .catch(function(){});
+  fetch('https://api.github.com/users/kardolus')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if (d && d.public_repos != null) set('repos-kpi', String(d.public_repos)); })
+    .catch(function(){});
+})();
+</script>
 
 </body>
 </html>
