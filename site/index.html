@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/style.css?v=8">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -137,7 +137,8 @@
   </article>
 
   <article class="card soon-card">
-    <div class="proj-head"><h3>Polaris <span class="pill">coming soon</span></h3><svg class="twinkle" aria-hidden="true"><use href="#compass"/></svg></div>
+    <span class="pill">coming soon</span>
+    <div class="proj-head"><h3>Polaris</h3><svg class="twinkle" aria-hidden="true"><use href="#compass"/></svg></div>
     <p>Star-gazing for lazy people — ask Claude to <em>"point at Saturn and show me."</em> An MCP server driving a telescope with plate-solve alignment.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>MCP</span><span class="tag">astronomy</span><span class="tag">hardware</span></div>
   </article>
