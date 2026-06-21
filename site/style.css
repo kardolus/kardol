@@ -184,3 +184,9 @@ a.kpi:hover{border-color:var(--accent)}
   .brand .logo,.photo img,.ph-badge{transition:none}
   .brand:hover .logo,.photo:hover img,.photo:hover .ph-badge{transform:none}
 }
+
+/* hero avatar (photo): subtle grayscale -> full colour on hover */
+.avatar{transition:filter .25s ease,transform .25s ease}
+img.avatar{filter:grayscale(.2) saturate(.95)}
+img.avatar:hover{filter:none;transform:scale(1.03)}
+@media(prefers-reduced-motion:reduce){img.avatar{transition:none}img.avatar:hover{transform:none}}
