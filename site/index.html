@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guillermo Kardolus — Software Engineer</title>
+<meta name="description" content="Guillermo Kardolus — software engineer, astrophysicist by training. Building developer tools, maps, and a homelab in Red Hook, Brooklyn.">
+<meta property="og:title" content="Guillermo Kardolus">
+<meta property="og:description" content="Software engineer, astrophysicist by training. Building tools, maps, and a homelab in Red Hook, Brooklyn.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kardol.us">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<script>
+  // apply saved theme before paint to avoid a flash
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  function toggleDark(){
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  }
+</script>
+</head>
+<body>
+
+<!-- reusable compass / north-star mark -->
+<svg style="display:none"><symbol id="compass" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.6l1.9 8.5 8.5 1.9-8.5 1.9-1.9 8.5-1.9-8.5-8.5-1.9 8.5-1.9z"/></symbol></svg>
+
+<header class="top-bar">
+  <div class="brand"><svg class="logo"><use href="#compass"/></svg> Guillermo Kardolus</div>
+  <div class="top-actions">
+    <nav class="top-nav">
+      <a href="#projects">Projects</a>
+      <a href="#numbers">By the numbers</a>
+      <a href="#life">Life</a>
+      <a href="#contact" class="always">Contact</a>
+    </nav>
+    <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="waves" aria-hidden="true">
+    <svg viewBox="0 0 1200 170" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="3">
+      <path d="M0 60 Q 150 20 300 60 T 600 60 T 900 60 T 1200 60"/>
+      <path d="M0 100 Q 150 60 300 100 T 600 100 T 900 100 T 1200 100"/>
+      <path d="M0 140 Q 150 100 300 140 T 600 140 T 900 140 T 1200 140"/>
+    </svg>
+  </div>
+  <div class="hero-inner">
+    <!-- TODO: replace with /img/headshot.webp (LinkedIn photo). Falls back to initials. -->
+    <div class="avatar" aria-label="Guillermo Kardolus">GK</div>
+    <div>
+      <h1>Guillermo Kardolus</h1>
+      <div class="role">Software Engineer</div>
+      <p class="blurb">Astrophysicist by training. I build developer tools, maps, and a basement homelab — and I'm happiest near the water in Red&nbsp;Hook, Brooklyn.</p>
+      <div class="links">
+        <a class="btn primary" href="https://github.com/kardolus">GitHub</a>
+        <a class="btn" href="https://www.linkedin.com/in/guillermokardolus/">LinkedIn</a>
+        <a class="btn" href="https://apps.apple.com/us/app/nemo-places/id6762070377">App Store</a>
+        <a class="btn" href="mailto:guillermo@kardol.us">Email</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOW -->
+<p class="now"><svg class="pin" width="16" height="16"><use href="#compass"/></svg>
+  <span><b>Currently</b> in Red Hook, Brooklyn — building <a href="https://apps.apple.com/us/app/nemo-places/id6762070377">Nemo&nbsp;Places</a> and a self-hosted homelab; baking sourdough, sailing the harbor, and running the waterfront.</span></p>
+
+<!-- FLAGSHIP -->
+<div class="section" id="flagship">Flagship</div>
+<article class="card flagship">
+  <div class="body">
+    <div class="eyebrow">open source</div>
+    <h2>chatgpt-cli</h2>
+    <p>A fast, multi-provider command-line interface for ChatGPT and other LLMs — chat, pipe, and script conversations straight from your terminal. Written in Go, installable via Homebrew.</p>
+    <div class="proj-links">
+      <a href="https://github.com/kardolus/chatgpt-cli">GitHub</a>
+      <a href="https://github.com/kardolus/homebrew-chatgpt-cli">Homebrew</a>
+    </div>
+  </div>
+  <div class="flag-kpi"><div class="n">937★</div><div class="l">GitHub stars</div></div>
+</article>
+
+<!-- PROJECTS -->
+<div class="section" id="projects">Things I've built</div>
+<div class="grid2">
+
+  <article class="card">
+    <div class="proj-head"><h3>Nemo Places</h3></div>
+    <p>Drop a pin on the spots you love, organize them by emoji, set time-bound places, and share the whole map with a link. iOS &amp; Android.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>iOS</span><span class="tag"><span class="dot"></span>Android</span><span class="tag">maps</span></div>
+    <div class="proj-links">
+      <a href="https://apps.apple.com/us/app/nemo-places/id6762070377">App Store</a>
+      <a href="https://play.google.com/store/apps/details?id=us.kardol.nemo">Play Store</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="proj-head"><h3>bart</h3></div>
+    <p>A recruiting &amp; hiring platform I designed and built — applicant tracking and pipeline tooling, end to end (Go API + Next.js).</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>product</span><span class="tag">full-stack</span><span class="tag">recruiting</span></div>
+  </article>
+
+  <article class="card">
+    <div class="proj-head"><h3>Citi Bike Dock Tracker</h3></div>
+    <p>Live dock availability plus 90-day patterns for Red Hook &amp; Brooklyn Citi Bike — ingester + dashboard, self-hosted on my cluster.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>Go</span><span class="tag">civic data</span><span class="tag">live</span></div>
+    <div class="proj-links">
+      <a href="https://citi.kardol.us">Live</a>
+      <a href="https://github.com/kardolus/citi-bike-dock-tracker">GitHub</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="proj-head"><h3>opendata</h3></div>
+    <p>Analytical notebooks and visualizations on NYC open datasets — the source the Citi Bike charts grew out of.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>Jupyter</span><span class="tag">data viz</span></div>
+    <div class="proj-links"><a href="https://github.com/kardolus/opendata">GitHub</a></div>
+  </article>
+
+  <article class="card">
+    <div class="proj-head"><h3>comet-cli</h3></div>
+    <p>Local CLI wrappers for driving the Comet browser from the terminal — so an AI agent can read and act on real pages.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>Python</span><span class="tag">tooling</span></div>
+    <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
+  </article>
+
+  <article class="card">
+    <div class="proj-head"><h3>forge — the homelab</h3></div>
+    <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
+  </article>
+
+</div>
+
+<!-- BY THE NUMBERS -->
+<div class="section" id="numbers">By the numbers</div>
+<div class="kpis">
+  <div class="kpi"><div class="kpi-n">937★</div><div class="kpi-l">GitHub stars · chatgpt-cli</div></div>
+  <div class="kpi"><div class="kpi-n">55</div><div class="kpi-l">open-source repos</div></div>
+  <!-- TODO(user): confirm/replace the playful numbers below -->
+  <div class="kpi"><div class="kpi-n">5</div><div class="kpi-l">half-marathons run</div></div>
+  <div class="kpi"><div class="kpi-n">120+</div><div class="kpi-l">loaves baked</div></div>
+  <div class="kpi"><div class="kpi-n">6</div><div class="kpi-l">years in Red Hook</div></div>
+</div>
+
+<!-- LIFE -->
+<div class="section" id="life">Outside the terminal</div>
+<div class="photos">
+  <!-- TODO(user): swap each <div class="ph"> for <img src="/img/<name>.webp" loading="lazy" width="800" height="533" alt="..."> -->
+  <figure class="photo"><div class="ph" aria-hidden="true">⛵</div><figcaption><b>Sailing</b> — happiest with better wind than Wi-Fi.</figcaption></figure>
+  <figure class="photo"><div class="ph" aria-hidden="true">🪚</div><figcaption><b>Woodworking</b> — weekend joinery and sawdust.</figcaption></figure>
+  <figure class="photo"><div class="ph" aria-hidden="true">🍞</div><figcaption><b>Bread</b> — hydration, patience, heat.</figcaption></figure>
+  <figure class="photo"><div class="ph" aria-hidden="true">🏃</div><figcaption><b>Running</b> — waterfront loops &amp; the odd half-marathon.</figcaption></figure>
+  <figure class="photo"><div class="ph" aria-hidden="true">🌅</div><figcaption><b>Red Hook</b> — home port.</figcaption></figure>
+</div>
+
+<!-- FOOTER -->
+<footer class="foot" id="contact">
+  <span>Made in Red Hook, Brooklyn · self-hosted on <span class="mono">forge</span></span>
+  <span class="links">
+    <a href="https://github.com/kardolus">GitHub</a>
+    <a href="https://www.linkedin.com/in/guillermokardolus/">LinkedIn</a>
+    <a href="mailto:guillermo@kardol.us">Email</a>
+  </span>
+</footer>
+
+</body>
+</html>

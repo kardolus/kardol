@@ -1,0 +1,97 @@
+# kardol.us — static personal site on the forge cluster.
+#
+# Build + side-load the image into k8s containerd:
+#   docker build -t kardol-web:v1 .
+#   docker save kardol-web:v1 | sudo ctr -a /run/k8s-containerd/containerd.sock -n k8s.io images import -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kardol
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kardol-web
+  namespace: kardol
+  labels: {app: kardol-web}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: kardol-web}
+  template:
+    metadata:
+      labels: {app: kardol-web}
+    spec:
+      containers:
+        - name: kardol-web
+          image: docker.io/library/kardol-web:v1
+          imagePullPolicy: Never
+          ports:
+            - {containerPort: 80, name: http}
+          readinessProbe:
+            httpGet: {path: /, port: 80}
+            initialDelaySeconds: 3
+            periodSeconds: 15
+          livenessProbe:
+            httpGet: {path: /, port: 80}
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kardol-web
+  namespace: kardol
+  labels: {app: kardol-web}
+spec:
+  selector: {app: kardol-web}
+  ports:
+    - {name: http, port: 80, targetPort: 80}
+---
+# apex kardol.us
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kardol-web
+  namespace: kardol
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kardol.us
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kardol-web
+                port: {number: 80}
+---
+# www.kardol.us → 301 to apex
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kardol-web-www
+  namespace: kardol
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/permanent-redirect: "https://kardol.us/"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: www.kardol.us
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kardol-web
+                port: {number: 80}
