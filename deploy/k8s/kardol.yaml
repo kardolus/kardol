@@ -1,8 +1,8 @@
 # kardol.us — static personal site on the forge cluster.
 #
 # Build + side-load the image into k8s containerd:
-#   docker build -t kardol-web:v10 .
-#   docker save kardol-web:v10 | sudo ctr -a /run/k8s-containerd/containerd.sock -n k8s.io images import -
+#   docker build -t kardol-web:v11 .
+#   docker save kardol-web:v11 | sudo ctr -a /run/k8s-containerd/containerd.sock -n k8s.io images import -
 ---
 apiVersion: v1
 kind: Namespace
@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: kardol-web
-          image: docker.io/library/kardol-web:v10
+          image: docker.io/library/kardol-web:v11
           imagePullPolicy: Never
           ports:
             - {containerPort: 80, name: http}
