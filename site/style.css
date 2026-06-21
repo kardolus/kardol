@@ -109,6 +109,8 @@ html.dark .btn.primary{color:#0d1117}
 .kpi{flex:1;min-width:140px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
   padding:16px 18px;transition:transform .15s,border-color .15s,box-shadow .15s}
 .kpi:hover{transform:translateY(-2px) scale(1.015);border-color:var(--border-strong);box-shadow:0 6px 18px rgba(0,0,0,.10)}
+a.kpi{display:block;text-decoration:none;color:inherit}
+a.kpi:hover{border-color:var(--accent)}
 .kpi-n{font-family:var(--font-ui);font-size:30px;font-weight:700;line-height:1}
 .kpi-l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--meta);margin-top:7px}
 
