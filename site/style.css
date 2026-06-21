@@ -104,6 +104,20 @@ html.dark .btn.primary{color:#0d1117}
 .proj-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-family:var(--font-ui);font-size:13px;font-weight:600}
 .proj-links a::after{content:" ↗";color:var(--meta)}
 
+/* "coming soon" teaser — dashed card + twinkling north-star (Polaris) */
+.soon{display:flex;gap:22px;align-items:center;flex-wrap:wrap;border-style:dashed}
+.soon-body{flex:1;min-width:240px}
+.soon-star{width:64px;height:64px;color:var(--accent);flex-shrink:0}
+.soon-body em{color:var(--fg);font-style:italic}
+.pill{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px;
+  vertical-align:middle;margin-left:8px}
+@media(prefers-reduced-motion:no-preference){
+  .soon-star{animation:twinkle 3.6s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.5;transform:scale(.9) rotate(0deg)}
+    50%{opacity:1;transform:scale(1.08) rotate(9deg)}}
+}
+
 /* KPI life-stats row */
 .kpis{display:flex;gap:12px;flex-wrap:wrap}
 .kpi{flex:1;min-width:140px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
