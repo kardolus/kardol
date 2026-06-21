@@ -108,9 +108,11 @@ html.dark .btn.primary{color:#0d1117}
 .soon-card{border-style:dashed}
 .soon-card em{color:var(--fg);font-style:italic}
 .twinkle{width:20px;height:20px;color:var(--accent);flex-shrink:0}
-.pill{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 8px;
-  vertical-align:middle;margin-left:6px}
+/* filled status pill, mirroring flightdeck's .beta-pill */
+.pill{display:inline-block;font-family:var(--font-ui);font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--accent);
+  border-radius:6px;padding:2px 7px;vertical-align:middle;margin-left:8px;line-height:1.6}
+html.dark .pill{color:#0d1117}
 @media(prefers-reduced-motion:no-preference){
   .twinkle{animation:twinkle 3.6s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.5;transform:scale(.9) rotate(0deg)}
