@@ -167,3 +167,20 @@ a.kpi:hover{border-color:var(--accent)}
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;
   gap:14px;justify-content:space-between;align-items:center;font-size:13px;color:var(--meta)}
 .foot .links{gap:14px;font-family:var(--font-ui);font-weight:600}
+
+/* playful micro-interactions (all reduced-motion safe) */
+.brand{cursor:pointer}
+.brand .logo{transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.brand:hover .logo{transform:rotate(14deg) scale(1.05)}
+.photo img{transition:transform .3s ease}
+.photo:hover img{transform:scale(1.04)}
+.ph-badge{transition:transform .2s ease}
+.photo:hover .ph-badge{transform:translateY(-2px) rotate(-5deg)}
+@media(prefers-reduced-motion:no-preference){
+  .brand .logo.spin{animation:compass-spin .6s ease}
+  @keyframes compass-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+}
+@media(prefers-reduced-motion:reduce){
+  .brand .logo,.photo img,.ph-badge{transition:none}
+  .brand:hover .logo,.photo:hover img,.photo:hover .ph-badge{transform:none}
+}

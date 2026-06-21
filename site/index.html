@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=10">
+<link rel="stylesheet" href="/style.css?v=12">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -261,6 +261,33 @@
   var sx=null;
   lb.addEventListener('pointerdown',function(e){sx=e.clientX;});
   lb.addEventListener('pointerup',function(e){if(sx==null)return; var dx=e.clientX-sx; if(Math.abs(dx)>40)show(idx+(dx<0?1:-1)); sx=null;});
+})();
+</script>
+
+<script>
+// playful: spin the compass mark on click
+(function(){
+  var brand=document.querySelector('.brand'), logo=brand&&brand.querySelector('.logo');
+  if(!logo) return;
+  brand.addEventListener('click',function(){ logo.classList.remove('spin'); void logo.offsetWidth; logo.classList.add('spin'); });
+  logo.addEventListener('animationend',function(){ logo.classList.remove('spin'); });
+})();
+// playful: count the KPI numbers up when they scroll into view
+(function(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if(!('IntersectionObserver' in window)) return;
+  function run(el){
+    var m=(el.textContent||'').match(/^([\d,]+)(.*)$/); if(!m) return;
+    var target=parseInt(m[1].replace(/,/g,''),10), suf=m[2]; if(!target) return;
+    var t0=null, dur=750;
+    function step(ts){ t0=t0||ts; var p=Math.min((ts-t0)/dur,1), e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(e*target).toLocaleString()+suf; if(p<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+  var seen=new WeakSet();
+  var io=new IntersectionObserver(function(es){ es.forEach(function(en){
+    if(en.isIntersecting && !seen.has(en.target)){ seen.add(en.target); run(en.target); io.unobserve(en.target); } }); },{threshold:0.4});
+  document.querySelectorAll('.kpis .kpi-n, .flag-kpi .n').forEach(function(n){ io.observe(n); });
 })();
 </script>
 
