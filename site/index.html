@@ -187,21 +187,43 @@
 </footer>
 
 <script>
-// Live-ish stats. The hardcoded values above are the fallback; these enhance on
-// load. Public GitHub API is CORS-enabled and unauthenticated (60 req/hr per IP).
+// Live GitHub stats + scroll count-up, single owner (avoids the count-up clobbering
+// the fetched value). Hardcoded numbers are the fallback; the GitHub API
+// (CORS-enabled, 60 req/hr/IP unauth) is authoritative when it resolves.
 (function(){
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   var y = document.getElementById('rh-years');           // years in Red Hook (since 2020)
   if (y) y.textContent = String(new Date().getFullYear() - 2020);
-  function set(id, txt){ var e = document.getElementById(id); if (e && txt) e.textContent = txt; }
-  fetch('https://api.github.com/repos/kardolus/chatgpt-cli')
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){ if (d && d.stargazers_count != null){
-      var s = d.stargazers_count.toLocaleString() + '★'; set('stars-kpi', s); set('stars-flag', s); } })
-    .catch(function(){});
-  fetch('https://api.github.com/users/kardolus')
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){ if (d && d.public_repos != null) set('repos-kpi', String(d.public_repos)); })
-    .catch(function(){});
+
+  // animate el's number up to `target` ("937★" / "55" / "10+"); a per-element token
+  // cancels any in-flight animation so a later value always wins.
+  function animate(el, target){
+    var m = String(target).match(/^([\d,]+)(.*)$/);
+    if (!m){ el.textContent = target; return; }
+    var n = parseInt(m[1].replace(/,/g, ''), 10), suf = m[2];
+    if (reduce || !n){ el.textContent = n.toLocaleString() + suf; return; }
+    var tok = (el._tok = (el._tok || 0) + 1), t0 = null, dur = 750;
+    (function step(ts){
+      if (el._tok !== tok) return;
+      t0 = t0 || ts; var p = Math.min((ts - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(e * n).toLocaleString() + suf;
+      if (p < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }
+
+  // count each stat up when it scrolls into view (to its current text)
+  var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
+    es.forEach(function(en){ if (en.isIntersecting){ animate(en.target, en.target.textContent); io.unobserve(en.target); } });
+  }, { threshold: 0.4 }) : null;
+  if (io) document.querySelectorAll('.kpis .kpi-n, .flag-kpi .n').forEach(function(el){ io.observe(el); });
+
+  // live GitHub values override the fallback for EVERY target (flagship + KPI)
+  function setLive(ids, val){ ids.forEach(function(id){ var el = document.getElementById(id); if (el){ if (io) io.unobserve(el); animate(el, val); } }); }
+  fetch('https://api.github.com/repos/kardolus/chatgpt-cli').then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if (d && d.stargazers_count != null) setLive(['stars-kpi','stars-flag'], d.stargazers_count.toLocaleString() + '★'); }).catch(function(){});
+  fetch('https://api.github.com/users/kardolus').then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){ if (d && d.public_repos != null) setLive(['repos-kpi'], String(d.public_repos)); }).catch(function(){});
 })();
 </script>
 
@@ -271,22 +293,11 @@
   brand.addEventListener('click',function(){ logo.classList.remove('spin'); void logo.offsetWidth; logo.classList.add('spin'); });
   logo.addEventListener('animationend',function(){ logo.classList.remove('spin'); });
 })();
-// playful: count the KPI numbers up when they scroll into view
+// open every external link in a new tab (leave in-page #anchors + mailto as-is)
 (function(){
-  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if(!('IntersectionObserver' in window)) return;
-  function run(el){
-    var m=(el.textContent||'').match(/^([\d,]+)(.*)$/); if(!m) return;
-    var target=parseInt(m[1].replace(/,/g,''),10), suf=m[2]; if(!target) return;
-    var t0=null, dur=750;
-    function step(ts){ t0=t0||ts; var p=Math.min((ts-t0)/dur,1), e=1-Math.pow(1-p,3);
-      el.textContent=Math.round(e*target).toLocaleString()+suf; if(p<1) requestAnimationFrame(step); }
-    requestAnimationFrame(step);
-  }
-  var seen=new WeakSet();
-  var io=new IntersectionObserver(function(es){ es.forEach(function(en){
-    if(en.isIntersecting && !seen.has(en.target)){ seen.add(en.target); run(en.target); io.unobserve(en.target); } }); },{threshold:0.4});
-  document.querySelectorAll('.kpis .kpi-n, .flag-kpi .n').forEach(function(n){ io.observe(n); });
+  document.querySelectorAll('a[href]').forEach(function(a){
+    if (/^https?:\/\//i.test(a.getAttribute('href') || '')){ a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+  });
 })();
 </script>
 
