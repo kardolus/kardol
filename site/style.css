@@ -192,10 +192,10 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 @media(prefers-reduced-motion:reduce){img.avatar{transition:none}img.avatar:hover{transform:none}}
 
 /* forge tile -> live-dashboard peek (static screenshot in browser chrome) */
-.forge-card{cursor:pointer}
-.forge-peek{font-family:var(--font-ui);font-weight:600;font-size:13px;color:var(--accent);
+.peek-card{cursor:pointer}
+.peek-btn{font-family:var(--font-ui);font-weight:600;font-size:13px;color:var(--accent);
   background:none;border:0;padding:0;cursor:pointer}
-.forge-peek:hover{text-decoration:underline}
+.peek-btn:hover{text-decoration:underline}
 .fm{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px;
   background:rgba(0,0,0,.74);backdrop-filter:blur(4px);animation:fm-in .18s ease}
 .fm[hidden]{display:none}

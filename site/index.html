@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=14">
+<link rel="stylesheet" href="/style.css?v=15">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -129,17 +129,18 @@
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
   </article>
 
-  <article class="card forge-card">
+  <article class="card peek-card" data-peek="forge">
     <div class="proj-head"><h3>forge — the homelab</h3></div>
     <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
-    <div class="proj-links"><button class="forge-peek" type="button">Peek at the live dashboard →</button></div>
+    <div class="proj-links"><button class="peek-btn" type="button">Peek at the live dashboard →</button></div>
   </article>
 
-  <article class="card">
+  <article class="card peek-card" data-peek="router">
     <div class="proj-head"><h3>Home router (OPNsense)</h3></div>
     <p>A hand-tuned OPNsense box that blocks ads network-wide, makes every device look like it's home over WireGuard, and policy-routes individual devices through different VPN exits — e.g. the Apple TV streaming from Berlin.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>OPNsense</span><span class="tag">networking</span><span class="tag">VPN</span></div>
+    <div class="proj-links"><button class="peek-btn" type="button">Peek at the dashboard →</button></div>
   </article>
 
   <article class="card soon-card">
@@ -317,19 +318,29 @@
 </script>
 
 <script>
-// forge tile -> peek at the cluster's live monitoring dashboard (static screenshot)
+// project tiles tagged data-peek -> modal with a static screenshot of that box's
+// own dashboard, framed in browser chrome. Images live on the public MinIO bucket.
 (function(){
-  var card=document.querySelector('.forge-card'), fm=document.getElementById('fm');
-  if(!card||!fm) return;
-  var img=document.getElementById('fm-img'), closeBtn=fm.querySelector('.fm-close');
-  var SHOT='https://s3.kardol.us/kardol-photos/v1/forge/forge-dashboard.webp', lastFocus=null;
+  var fm=document.getElementById('fm'); if(!fm) return;
+  var img=document.getElementById('fm-img'), urlEl=fm.querySelector('.fm-url'),
+      capEl=fm.querySelector('.fm-cap'), closeBtn=fm.querySelector('.fm-close');
+  var S3='https://s3.kardol.us/kardol-photos/v1', lastFocus=null;
+  var PEEKS={
+    forge:{img:S3+'/forge/forge-dashboard.webp', url:'grafana.kardol.us', alt:'forge cluster Grafana dashboard: HEALTHY app boxes, CPU/memory/disk gauges, per-host ingress request rate.',
+      cap:'forge — the basement Kubernetes node serving this page, watching itself. See that <b>kardol.us&nbsp;req/s</b> line in the ingress chart? Your visit is in it.'},
+    router:{img:S3+'/router/router-dashboard.webp', url:'router.internal', alt:'OPNsense dashboard: system info, gateways, interface and firewall statistics, traffic graphs.',
+      cap:'The OPNsense box guarding the house — network-wide ad-blocking, WireGuard, and per-device VPN exits. Yes, the Apple&nbsp;TV really does stream from <b>Berlin</b>.'}
+  };
   var others=function(){return Array.prototype.filter.call(document.body.children,function(el){return el!==fm;});};
-  function open(){ if(!img.getAttribute('src')) img.src=SHOT; lastFocus=document.activeElement; fm.hidden=false;
+  function open(key){ var p=PEEKS[key]; if(!p) return;
+    img.src=p.img; img.alt=p.alt; urlEl.textContent=p.url; capEl.innerHTML=p.cap;
+    lastFocus=document.activeElement; fm.hidden=false;
     others().forEach(function(el){el.inert=true;}); document.addEventListener('keydown',onKey); closeBtn.focus(); }
   function close(){ fm.hidden=true; others().forEach(function(el){el.inert=false;});
     document.removeEventListener('keydown',onKey); if(lastFocus)lastFocus.focus(); }
   function onKey(e){ if(e.key==='Escape')close(); }
-  card.addEventListener('click',open);
+  document.querySelectorAll('.peek-card').forEach(function(card){
+    card.addEventListener('click',function(){ open(card.dataset.peek); }); });
   closeBtn.addEventListener('click',function(e){e.stopPropagation();close();});
   fm.addEventListener('click',function(e){if(e.target===fm)close();});
 })();
