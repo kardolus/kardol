@@ -190,3 +190,28 @@ a.kpi:hover{border-color:var(--accent)}
 img.avatar{filter:grayscale(.2) saturate(.95)}
 img.avatar:hover{filter:none;transform:scale(1.03)}
 @media(prefers-reduced-motion:reduce){img.avatar{transition:none}img.avatar:hover{transform:none}}
+
+/* forge tile -> live-dashboard peek (static screenshot in browser chrome) */
+.forge-card{cursor:pointer}
+.forge-peek{font-family:var(--font-ui);font-weight:600;font-size:13px;color:var(--accent);
+  background:none;border:0;padding:0;cursor:pointer}
+.forge-peek:hover{text-decoration:underline}
+.fm{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px;
+  background:rgba(0,0,0,.74);backdrop-filter:blur(4px);animation:fm-in .18s ease}
+.fm[hidden]{display:none}
+@keyframes fm-in{from{opacity:0}to{opacity:1}}
+.fm-win{max-width:min(1120px,96vw);max-height:92vh;margin:0;display:flex;flex-direction:column;
+  border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:#0d1117;
+  box-shadow:0 24px 70px rgba(0,0,0,.5);animation:fm-pop .2s cubic-bezier(.2,.8,.2,1)}
+@keyframes fm-pop{from{transform:scale(.97);opacity:.6}to{transform:scale(1);opacity:1}}
+.fm-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#161b22;border-bottom:1px solid #30363d}
+.fm-dots{display:flex;gap:6px}
+.fm-dots i{width:11px;height:11px;border-radius:50%;display:block}
+.fm-dots i:nth-child(1){background:#ff5f57}.fm-dots i:nth-child(2){background:#febc2e}.fm-dots i:nth-child(3){background:#28c840}
+.fm-url{flex:1;text-align:center;font-family:var(--font-mono);font-size:12px;color:#8b949e}
+.fm-close{background:none;border:0;color:#8b949e;font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+.fm-close:hover{color:#e2e8f0}
+.fm-shot{display:block;width:100%;height:auto;max-height:74vh;object-fit:contain;background:#0d1117}
+.fm-cap{padding:13px 16px;font-size:13.5px;color:var(--meta);background:var(--card);border-top:1px solid var(--border)}
+.fm-cap b{color:var(--accent);font-family:var(--font-mono);font-weight:600}
+@media (prefers-reduced-motion:reduce){.fm,.fm-win{animation:none}}

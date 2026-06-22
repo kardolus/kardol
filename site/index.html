@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=13">
+<link rel="stylesheet" href="/style.css?v=14">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -129,10 +129,11 @@
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
   </article>
 
-  <article class="card">
+  <article class="card forge-card">
     <div class="proj-head"><h3>forge — the homelab</h3></div>
     <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
+    <div class="proj-links"><button class="forge-peek" type="button">Peek at the live dashboard →</button></div>
   </article>
 
   <article class="card">
@@ -174,6 +175,20 @@
   <figure class="lb-stage"><img id="lb-img" alt=""><figcaption id="lb-cap"></figcaption></figure>
   <button class="lb-nav lb-next" aria-label="Next photo">›</button>
   <div class="lb-strip" id="lb-strip"></div>
+</div>
+
+<!-- forge dashboard peek: a static screenshot of the cluster's own Grafana, framed
+     in browser chrome. The visitor is literally a data point in the ingress chart. -->
+<div class="fm" id="fm" role="dialog" aria-modal="true" aria-label="forge monitoring dashboard" hidden>
+  <figure class="fm-win">
+    <div class="fm-bar">
+      <span class="fm-dots"><i></i><i></i><i></i></span>
+      <span class="fm-url">grafana.kardol.us</span>
+      <button class="fm-close" aria-label="Close">×</button>
+    </div>
+    <img class="fm-shot" id="fm-img" alt="forge cluster Grafana dashboard: a row of HEALTHY app boxes, CPU / memory / disk gauges, and a per-host ingress request-rate chart.">
+    <figcaption class="fm-cap">forge — the basement Kubernetes node serving this page, watching itself. See that <b>kardol.us&nbsp;req/s</b> line in the ingress chart? Your visit is in it.</figcaption>
+  </figure>
 </div>
 
 <!-- FOOTER -->
@@ -298,6 +313,25 @@
   document.querySelectorAll('a[href]').forEach(function(a){
     if (/^https?:\/\//i.test(a.getAttribute('href') || '')){ a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   });
+})();
+</script>
+
+<script>
+// forge tile -> peek at the cluster's live monitoring dashboard (static screenshot)
+(function(){
+  var card=document.querySelector('.forge-card'), fm=document.getElementById('fm');
+  if(!card||!fm) return;
+  var img=document.getElementById('fm-img'), closeBtn=fm.querySelector('.fm-close');
+  var SHOT='https://s3.kardol.us/kardol-photos/v1/forge/forge-dashboard.webp', lastFocus=null;
+  var others=function(){return Array.prototype.filter.call(document.body.children,function(el){return el!==fm;});};
+  function open(){ if(!img.getAttribute('src')) img.src=SHOT; lastFocus=document.activeElement; fm.hidden=false;
+    others().forEach(function(el){el.inert=true;}); document.addEventListener('keydown',onKey); closeBtn.focus(); }
+  function close(){ fm.hidden=true; others().forEach(function(el){el.inert=false;});
+    document.removeEventListener('keydown',onKey); if(lastFocus)lastFocus.focus(); }
+  function onKey(e){ if(e.key==='Escape')close(); }
+  card.addEventListener('click',open);
+  closeBtn.addEventListener('click',function(e){e.stopPropagation();close();});
+  fm.addEventListener('click',function(e){if(e.target===fm)close();});
 })();
 </script>
 
