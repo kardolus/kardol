@@ -23,10 +23,12 @@ spec:
     metadata:
       labels: {app: kardol-web}
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull
       containers:
         - name: kardol-web
-          image: docker.io/library/kardol-web:v14
-          imagePullPolicy: Never
+          image: ghcr.io/kardolus/kardol-web:v15
+          imagePullPolicy: IfNotPresent
           ports:
             - {containerPort: 80, name: http}
           readinessProbe:
