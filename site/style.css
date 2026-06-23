@@ -1,7 +1,7 @@
 /* kardol.us — personal site. Design system reused from the Citi Bike tracker
    (flightdeck): CSS vars, fonts, cards, KPIs, dark mode. Accent = green. */
 :root{
-  --bg:#f8f9fa;--fg:#14171e;--meta:#6f737b;--border:#e2e5e8;--border-strong:#c8cdd3;
+  --bg:#f8f9fa;--fg:#14171e;--meta:#5b5f67;--border:#e2e5e8;--border-strong:#c8cdd3;
   --card:#f3f4f6;--ctrl-bg:#fff;--ctrl-fg:#14171e;--ctrl-border:#c8cdd3;
   --btn-hover:#eeeff1;--accent:#1da46c;--accent-soft:#1da46c22;
   --good:#1da46c;--warn:#d98a00;--bad:#c0392b;
@@ -129,7 +129,7 @@ html.dark .pill{color:#0d1117}
 
 /* KPI life-stats row */
 .kpis{display:flex;gap:12px;flex-wrap:wrap}
-.kpi{flex:1;min-width:118px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
+.kpi{flex:1 1 118px;min-width:118px;max-width:190px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
   padding:16px 18px;transition:transform .15s,border-color .15s,box-shadow .15s}
 .kpi:hover{transform:translateY(-2px) scale(1.015);border-color:var(--border-strong);box-shadow:0 6px 18px rgba(0,0,0,.10)}
 a.kpi{display:block;text-decoration:none;color:inherit}
@@ -236,3 +236,12 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
   border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin:13px 0 2px;
   color:var(--fg);overflow-x:auto;white-space:nowrap}
 .term .prompt{color:var(--accent);margin-right:9px;user-select:none}
+
+/* active section in the top nav (set by scroll observer) */
+.top-nav a.active{color:var(--fg);border-bottom-color:var(--accent)}
+
+/* gentle scroll-in for below-the-fold blocks (JS adds .reveal only when off-screen) */
+@media(prefers-reduced-motion:no-preference){
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+  .reveal.in{opacity:1;transform:none}
+}
