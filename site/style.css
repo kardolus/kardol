@@ -128,8 +128,10 @@ html.dark .pill{color:#0d1117}
 }
 
 /* KPI life-stats row */
-.kpis{display:flex;gap:12px;flex-wrap:wrap}
-.kpi{flex:1 1 118px;min-width:118px;max-width:190px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
+/* grid so every tile is the same width regardless of which row it lands on
+   (auto-fill keeps the last row's tiles column-width instead of stretching an orphan) */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.kpi{min-width:0;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);
   padding:16px 18px;transition:transform .15s,border-color .15s,box-shadow .15s}
 .kpi:hover{transform:translateY(-2px) scale(1.015);border-color:var(--border-strong);box-shadow:0 6px 18px rgba(0,0,0,.10)}
 a.kpi{display:block;text-decoration:none;color:inherit}
@@ -248,3 +250,5 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 
 /* language-codes KPI value (smaller than the numeric kpi-n so EN · NL · ES fits) */
 .kpi-n.kpi-codes{font-size:18px;letter-spacing:.01em}
+/* citizenship flags KPI value */
+.kpi-n.kpi-flags{font-size:26px;line-height:1.1;letter-spacing:.04em}
