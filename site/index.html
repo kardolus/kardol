@@ -370,24 +370,28 @@
 // active-section highlight in the top nav + gentle scroll-in for below-the-fold blocks
 (function(){
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!('IntersectionObserver' in window)) return;
 
-  // --- active nav link ---
+  // --- active nav link: the last section whose heading has scrolled past a marker
+  // near the top of the viewport; none active while still up in the hero ---
   var links = Array.prototype.slice.call(document.querySelectorAll('.top-nav a'));
-  var map = {};
-  links.forEach(function(a){ var id=(a.getAttribute('href')||'').slice(1); var el=id&&document.getElementById(id); if(el) map[id]=a; });
-  if(Object.keys(map).length){
-    var navIO = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){
-        links.forEach(function(a){a.classList.remove('active');});
-        if(map[e.target.id]) map[e.target.id].classList.add('active');
-      }});
-    }, {rootMargin:'-45% 0px -50% 0px'});
-    Object.keys(map).forEach(function(id){ navIO.observe(document.getElementById(id)); });
+  var pairs = [];
+  links.forEach(function(a){ var el=document.getElementById((a.getAttribute('href')||'').slice(1)); if(el) pairs.push({a:a, el:el}); });
+  if(pairs.length){
+    var ticking=false;
+    var setActive=function(){
+      var marker=(window.innerHeight||document.documentElement.clientHeight)*0.3;
+      var current=null;
+      pairs.forEach(function(p){ if(p.el.getBoundingClientRect().top<=marker) current=p; });
+      pairs.forEach(function(p){ p.a.classList.toggle('active', p===current); });
+    };
+    var onScroll=function(){ if(!ticking){ ticking=true; requestAnimationFrame(function(){ setActive(); ticking=false; }); } };
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    setActive();
   }
 
   // --- scroll-in reveal (only blocks currently below the fold, so no on-load flash) ---
-  if(reduce) return;
+  if(reduce || !('IntersectionObserver' in window)) return;
   var vh = window.innerHeight || document.documentElement.clientHeight;
   var revIO = new IntersectionObserver(function(es){
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); revIO.unobserve(e.target); } });
