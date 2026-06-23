@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20">
+<link rel="stylesheet" href="/style.css?v=21">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -183,6 +183,7 @@
   <a class="kpi" href="https://results.nyrr.org/runner/52507628/races#ed=HALF&page=1" target="_blank" rel="noopener"><div class="kpi-n">18</div><div class="kpi-l">half-marathons · NYRR ↗</div></a>
   <!-- TODO(user): confirm/replace the playful number below -->
   <div class="kpi"><div class="kpi-n">120+</div><div class="kpi-l">loaves baked</div></div>
+  <div class="kpi"><div class="kpi-n" id="nyc-years">17</div><div class="kpi-l">years in NYC</div></div>
   <div class="kpi"><div class="kpi-n" id="rh-years">6</div><div class="kpi-l">years in Red Hook</div></div>
 </div>
 
@@ -232,6 +233,8 @@
 
   var y = document.getElementById('rh-years');           // years in Red Hook (since 2020)
   if (y) y.textContent = String(new Date().getFullYear() - 2020);
+  var ny = document.getElementById('nyc-years');         // years in NYC (since 2009)
+  if (ny) ny.textContent = String(new Date().getFullYear() - 2009);
 
   // animate el's number up to `target` ("937★" / "55" / "10+"); a per-element token
   // cancels any in-flight animation so a later value always wins.
