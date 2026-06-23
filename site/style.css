@@ -223,3 +223,16 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 .fm-cap{padding:13px 16px;font-size:13.5px;color:var(--meta);background:var(--card);border-top:1px solid var(--border)}
 .fm-cap b{color:var(--accent);font-family:var(--font-mono);font-weight:600}
 @media (prefers-reduced-motion:reduce){.fm,.fm-win{animation:none}}
+
+/* project glyphs in card titles (stroke icons; subtle by default, accent on card hover) */
+.proj-head h3,.flagship h2{display:flex;align-items:center;gap:9px}
+.proj-icon{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--meta);transition:color .15s}
+.card:hover .proj-icon{color:var(--accent)}
+.flagship .proj-icon{color:var(--accent)}
+
+/* flagship terminal example (on-brand for a CLI) */
+.term{font-family:var(--font-mono);font-size:12.5px;line-height:1.5;background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;padding:9px 12px;margin:13px 0 2px;
+  color:var(--fg);overflow-x:auto;white-space:nowrap}
+.term .prompt{color:var(--accent);margin-right:9px;user-select:none}

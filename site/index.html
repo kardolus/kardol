@@ -3,17 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
 <title>Guillermo Kardolus — Software Engineer</title>
 <meta name="description" content="Guillermo Kardolus — software engineer, astrophysicist by training. Building developer tools, maps, and a homelab in Red Hook, Brooklyn.">
 <meta property="og:title" content="Guillermo Kardolus">
 <meta property="og:description" content="Software engineer, astrophysicist by training. Building tools, maps, and a homelab in Red Hook, Brooklyn.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kardol.us">
+<meta property="og:image" content="https://kardol.us/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Guillermo Kardolus">
+<meta name="twitter:description" content="Software engineer, astrophysicist by training. Building tools, maps, and a homelab in Red Hook, Brooklyn.">
+<meta name="twitter:image" content="https://kardol.us/img/og.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=16">
+<link rel="stylesheet" href="/style.css?v=17">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -25,8 +34,17 @@
 </head>
 <body>
 
-<!-- reusable compass / north-star mark -->
-<svg style="display:none"><symbol id="compass" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.6l1.9 8.5 8.5 1.9-8.5 1.9-1.9 8.5-1.9-8.5-8.5-1.9 8.5-1.9z"/></symbol></svg>
+<!-- reusable icon sprite: compass mark (fill) + project glyphs (stroke, Feather/Lucide-style) -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="compass" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.6l1.9 8.5 8.5 1.9-8.5 1.9-1.9 8.5-1.9-8.5-8.5-1.9 8.5-1.9z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-bike" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="9"/><line x1="18" y1="20" x2="18" y2="5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><line x1="6" y1="7" x2="6.01" y2="7"/><line x1="6" y1="17" x2="6.01" y2="17"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+</svg>
 
 <header class="top-bar">
   <div class="brand"><svg class="logo"><use href="#compass"/></svg> Guillermo Kardolus</div>
@@ -75,8 +93,9 @@
 <article class="card flagship">
   <div class="body">
     <div class="eyebrow">open source</div>
-    <h2>chatgpt-cli</h2>
+    <h2><svg class="proj-icon" aria-hidden="true"><use href="#i-terminal"/></svg> chatgpt-cli</h2>
     <p>A fast, multi-provider command-line interface for ChatGPT and other LLMs — chat, pipe, and script conversations straight from your terminal. Written in Go, installable via Homebrew.</p>
+    <div class="term"><span class="prompt">$</span>git diff | chatgpt "write a commit message"</div>
     <div class="proj-links">
       <a href="https://github.com/kardolus/chatgpt-cli">GitHub</a>
       <a href="https://github.com/kardolus/homebrew-chatgpt-cli">Homebrew</a>
@@ -90,7 +109,7 @@
 <div class="grid2">
 
   <article class="card">
-    <div class="proj-head"><h3>Nemo Places</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-pin"/></svg> Nemo Places</h3></div>
     <p>Drop a pin on the spots you love, organize them by emoji, set time-bound places, and share the whole map with a link. iOS &amp; Android.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>iOS</span><span class="tag"><span class="dot"></span>Android</span><span class="tag">maps</span></div>
     <div class="proj-links">
@@ -101,13 +120,13 @@
   </article>
 
   <article class="card">
-    <div class="proj-head"><h3>bart</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-briefcase"/></svg> bart</h3></div>
     <p>A recruiting &amp; hiring platform I designed and built — applicant tracking and pipeline tooling, end to end (Go API + Next.js).</p>
     <div class="tags"><span class="tag"><span class="dot"></span>product</span><span class="tag">full-stack</span><span class="tag">recruiting</span></div>
   </article>
 
   <article class="card">
-    <div class="proj-head"><h3>Citi Bike Dock Tracker</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-bike"/></svg> Citi Bike Dock Tracker</h3></div>
     <p>Live dock availability plus 90-day patterns for Red Hook &amp; Brooklyn Citi Bike — ingester + dashboard, self-hosted on my cluster.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>Go</span><span class="tag">civic data</span><span class="tag">live</span></div>
     <div class="proj-links">
@@ -117,28 +136,28 @@
   </article>
 
   <article class="card">
-    <div class="proj-head"><h3>opendata</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-chart"/></svg> opendata</h3></div>
     <p>Analytical notebooks and visualizations on NYC open datasets — the source the Citi Bike charts grew out of.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>Jupyter</span><span class="tag">data viz</span></div>
     <div class="proj-links"><a href="https://github.com/kardolus/opendata">GitHub</a></div>
   </article>
 
   <article class="card">
-    <div class="proj-head"><h3>comet-cli</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-terminal"/></svg> comet-cli</h3></div>
     <p>Local CLI wrappers for driving the Comet browser from the terminal — so an AI agent can read and act on real pages.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>Python</span><span class="tag">tooling</span></div>
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
   </article>
 
   <article class="card peek-card" data-peek="forge">
-    <div class="proj-head"><h3>forge — the homelab</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-server"/></svg> forge — the homelab</h3></div>
     <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
     <div class="proj-links"><button class="peek-btn" type="button">Peek at the live dashboard →</button></div>
   </article>
 
   <article class="card peek-card" data-peek="router">
-    <div class="proj-head"><h3>Home router (OPNsense)</h3></div>
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-shield"/></svg> Home router (OPNsense)</h3></div>
     <p>A hand-tuned OPNsense box that blocks ads network-wide, makes every device look like it's home over WireGuard, and policy-routes individual devices through different VPN exits — e.g. the Apple TV streaming from Berlin.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>OPNsense</span><span class="tag">networking</span><span class="tag">VPN</span></div>
     <div class="proj-links"><button class="peek-btn" type="button">Peek at the dashboard →</button></div>
@@ -146,7 +165,7 @@
 
   <article class="card soon-card">
     <span class="pill">coming soon</span>
-    <div class="proj-head"><h3>Polaris</h3><svg class="twinkle" aria-hidden="true"><use href="#compass"/></svg></div>
+    <div class="proj-head"><h3><svg class="twinkle" aria-hidden="true"><use href="#compass"/></svg> Polaris</h3></div>
     <p>Star-gazing for lazy people — ask Claude to <em>"point at Saturn and show me."</em> An MCP server driving a telescope with plate-solve alignment.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>MCP</span><span class="tag">astronomy</span><span class="tag">hardware</span></div>
   </article>
