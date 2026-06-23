@@ -245,3 +245,6 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
   .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
   .reveal.in{opacity:1;transform:none}
 }
+
+/* language-codes KPI value (smaller than the numeric kpi-n so EN · NL · ES fits) */
+.kpi-n.kpi-codes{font-size:18px;letter-spacing:.01em}
