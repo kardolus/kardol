@@ -250,5 +250,3 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 
 /* language-codes KPI value (smaller than the numeric kpi-n so EN · NL · ES fits) */
 .kpi-n.kpi-codes{font-size:18px;letter-spacing:.01em}
-/* citizenship flags KPI value */
-.kpi-n.kpi-flags{font-size:26px;line-height:1.1;letter-spacing:.04em}
