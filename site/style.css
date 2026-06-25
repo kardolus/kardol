@@ -42,6 +42,9 @@ a:hover{text-decoration:underline}
 .dark-toggle{background:none;border:1px solid var(--ctrl-border);border-radius:var(--radius-sm);cursor:pointer;
   font-size:16px;line-height:1;padding:5px 9px;color:var(--fg)}
 .dark-toggle:hover{background:var(--btn-hover)}
+.retro-toggle{background:none;border:1px solid var(--ctrl-border);border-radius:var(--radius-sm);cursor:pointer;
+  font-family:var(--font-mono);font-size:12px;font-weight:500;line-height:1;padding:6px 9px;color:var(--meta)}
+.retro-toggle:hover{background:var(--btn-hover);color:var(--accent);border-color:var(--accent)}
 @media(max-width:640px){.top-nav a:not(.always){display:none}}
 
 /* hero */

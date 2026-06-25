@@ -1,0 +1,148 @@
+/* ===========================================================================
+   kardol.us — 90s MODE (the costume). Active only under html.retro.
+   Self-contained: no external GIFs/fonts/audio. Purely additive + reversible —
+   delete this file + retro.js + the index.html hooks and nothing remains.
+   =========================================================================== */
+
+/* Recolor the whole design system to clashing Web-1.0 glory by overriding the
+   :root vars, then fix readability where neon-on-silver would hurt. */
+html.retro{
+  --bg:#000080;            /* navy, the classic */
+  --fg:#00ff00;           /* lime */
+  --meta:#00ffff;         /* cyan */
+  --accent:#ff00ff;       /* magenta */
+  --accent-soft:#ff00ff33;
+  --card:#c0c0c0;         /* silver beveled boxes */
+  --ctrl-bg:#c0c0c0; --ctrl-fg:#000; --ctrl-border:#fff;
+  --border:#ff00ff; --border-strong:#ffff00;
+  --good:#00ff00; --warn:#ffff00; --bad:#ff0000;
+  --radius-sm:0; --radius-md:0; --radius-lg:0;     /* no rounded corners in 1998 */
+  --font-ui:"Comic Sans MS","Comic Sans","Chalkboard SE",cursive;
+  --font-body:"Comic Sans MS","Comic Sans",cursive;
+  --font-mono:"Courier New",monospace;
+}
+
+/* Tiled starfield over navy — three radial-gradient layers, no image. */
+html.retro body{
+  background-color:#000080;
+  background-image:
+    radial-gradient(#ffffff 1px, transparent 1.5px),
+    radial-gradient(#ffff66 1px, transparent 1.5px),
+    radial-gradient(#66ffff 1px, transparent 1.5px);
+  background-size:53px 53px, 97px 71px, 131px 113px;
+  background-position:0 0, 23px 41px, 67px 9px;
+  background-attachment:fixed;
+  color:var(--fg);
+  padding-top:30px;            /* room for the fixed marquee */
+  padding-bottom:26px;         /* room for the fixed status bar */
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ctext y='22' font-size='22'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E") 4 4, auto;
+}
+
+/* Silver beveled boxes with black text so content stays legible. */
+html.retro .card,html.retro .kpi,html.retro .panel,html.retro .peek,
+html.retro figure,html.retro blockquote{
+  background:var(--card)!important;color:#000!important;
+  border:3px outset #ffffff!important;box-shadow:5px 5px 0 #000!important;
+}
+html.retro .card *,html.retro .kpi *,html.retro .panel *{color:#000!important;}
+html.retro .tag,html.retro .mono,html.retro code{
+  background:#000!important;color:#00ff00!important;border:1px solid #00ff00;font-family:var(--font-mono)!important;}
+
+/* Headings: loud, a couple of them blink. */
+html.retro h1,html.retro h2,html.retro h3{
+  color:#ffff00!important;text-shadow:2px 2px #ff00ff,-2px -2px #00ffff;font-family:var(--font-ui)!important;}
+html.retro h1{animation:retro-blink 1.1s steps(1) infinite;}
+
+/* Links: blue, underlined, visited purple — the way God intended. */
+html.retro a{color:#0000ee!important;text-decoration:underline!important;}
+html.retro a:visited{color:#551a8b!important;}
+html.retro .card a,html.retro .kpi a{color:#0000ee!important;}
+
+/* Rainbow horizontal rules. */
+html.retro hr{height:6px;border:0;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet);}
+
+/* THE SIGNATURE GAG: a permanently spinning @ where the compass was. */
+html.retro .brand{cursor:pointer;}
+html.retro .brand .logo{display:none!important;}
+html.retro .brand::before{
+  content:"@";display:inline-block;vertical-align:middle;margin-right:6px;
+  font:900 30px/1 "Times New Roman",serif;color:#ff00ff;text-shadow:2px 2px #00ffff;
+  animation:retro-spin 1.3s linear infinite;}
+html.retro .brand{color:#ffff00!important;font-family:var(--font-ui)!important;text-shadow:1px 1px #ff00ff;}
+
+/* Gallery photos: ridge frames + a blinking NEW! flag. */
+html.retro .photo{position:relative;border:5px ridge #c0c0c0!important;border-radius:0!important;}
+html.retro .photo::after{
+  content:"NEW!";position:absolute;top:3px;left:3px;z-index:2;
+  background:#ffff00;color:#ff0000;font:bold 11px var(--font-ui);padding:1px 4px;border:1px solid #ff0000;
+  animation:retro-blink 0.7s steps(1) infinite;}
+
+/* ---- injected decorative layer (#retro-layer) -------------------------- */
+#retro-layer{font-family:var(--font-ui);}
+
+/* fixed scrolling marquee at the very top */
+#retro-layer .rl-marquee{
+  position:fixed;top:0;left:0;right:0;z-index:90000;
+  background:#ffff00;color:#ff0000;font:bold 16px var(--font-ui);
+  border-bottom:3px ridge #ff00ff;padding:5px 0;white-space:nowrap;}
+
+/* fake Netscape status bar pinned to the bottom */
+#retro-layer .rl-status{
+  position:fixed;bottom:0;left:0;right:0;z-index:90000;
+  background:#c0c0c0;color:#000;border-top:2px groove #fff;
+  font:11px var(--font-mono);padding:4px 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+
+/* opt-in sound button + one-shot mail envelope */
+#retro-layer .rl-sound{
+  position:fixed;right:14px;bottom:32px;z-index:90001;cursor:pointer;
+  background:linear-gradient(#fff,#aaa);color:#000080;border:4px outset #fff;
+  font:bold 14px var(--font-ui);padding:6px 10px;}
+#retro-layer .rl-mail{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(1);z-index:90002;
+  background:#fffbe6;border:4px outset #ffd700;padding:18px 26px;font:bold 20px var(--font-ui);color:#cc0000;
+  box-shadow:8px 8px 0 rgba(0,0,0,.5);animation:retro-mail 2.4s ease forwards;pointer-events:none;}
+
+/* appended scrolling footer-of-junk (webring, guestbook, badges, counter) */
+#retro-layer .rl-footer{
+  margin:30px auto;max-width:760px;padding:18px;text-align:center;
+  background:#000;color:#00ff00;border:4px ridge #ff00ff;font-family:var(--font-ui);}
+#retro-layer .rl-footer a{color:#00ffff!important;}
+#retro-layer .rl-construction{
+  display:inline-block;margin:6px 0;padding:6px 14px;color:#000;font:bold 16px var(--font-ui);
+  background:repeating-linear-gradient(45deg,#ffcc00 0 12px,#000 12px 24px);
+  -webkit-text-stroke:0.5px #fff;border:3px outset #888;}
+#retro-layer .rl-counter{
+  display:inline-block;margin:10px 4px;background:#000;color:#00ff00;border:3px inset #888;
+  font:18px var(--font-mono);letter-spacing:3px;padding:4px 8px;}
+#retro-layer .rl-badges{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+#retro-layer .rl-badge{
+  width:88px;height:31px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font:bold 9px var(--font-ui);line-height:1.05;padding:2px;border:2px outset #fff;color:#fff;}
+#retro-layer .rl-webring{margin:10px 0;color:#ffff00;font-weight:bold;}
+#retro-layer .rl-guestbook{display:inline-block;margin:8px;color:#ff00ff!important;font-weight:bold;
+  animation:retro-blink 0.8s steps(1) infinite;}
+
+/* The toggle becomes a pinned, always-on-top "Now" escape hatch in retro mode. */
+html.retro .retro-toggle{
+  position:fixed!important;top:34px;right:14px;z-index:99999;
+  background:linear-gradient(#fff,#aaa)!important;color:#000080!important;
+  border:5px outset #fff!important;font:bold 16px var(--font-ui)!important;padding:8px 14px!important;
+  animation:retro-blink 1.3s steps(1) infinite;}
+
+/* ---- animations -------------------------------------------------------- */
+@keyframes retro-spin{to{transform:rotate(360deg);}}
+@keyframes retro-blink{50%{opacity:0;}}
+@keyframes retro-mail{0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+  15%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+  75%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-60%) scale(1);}}
+
+/* ---- footguns ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce){
+  html.retro *,html.retro *::before,html.retro *::after{animation:none!important;}
+  #retro-layer .rl-marquee{display:none!important;}
+}
+@media (max-width:700px){
+  html.retro .brand::before{font-size:22px;}
+  #retro-layer .rl-sound,#retro-layer .rl-status{display:none!important;}
+  html.retro .card,html.retro .kpi,html.retro .panel{box-shadow:3px 3px 0 #000!important;}
+}

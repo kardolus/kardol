@@ -22,7 +22,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=22">
+<link rel="stylesheet" href="/style.css?v=23">
+<link rel="stylesheet" href="/retro.css?v=1">
 <script>
   // apply saved theme before paint to avoid a flash
   if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -30,8 +31,20 @@
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
   }
+  // 90s mode: apply the class before paint too. ?retro=1 / ?retro=0 override the saved pref.
+  (function(){
+    var q = new URLSearchParams(location.search).get('retro');
+    var on = q === '1' ? true : q === '0' ? false : localStorage.getItem('retro') === 'on';
+    if (on) document.documentElement.classList.add('retro');
+  })();
+  function toggleRetro(){
+    var on = document.documentElement.classList.toggle('retro');
+    localStorage.setItem('retro', on ? 'on' : 'off');
+    if (window.applyRetro) window.applyRetro(on);  // retro.js injects/removes the decorations
+  }
 </script>
 <script defer src="https://analytics.kardol.us/script.js" data-website-id="315018e0-6e4e-4916-bc46-55ad40b65df6"></script>
+<script defer src="/retro.js?v=1"></script>
 </head>
 <body>
 
@@ -55,6 +68,7 @@
       <a href="#numbers">By the numbers</a>
       <a href="#life">Life</a>
     </nav>
+    <button class="retro-toggle" onclick="toggleRetro()" title="Time-warp to 1998" aria-label="Toggle 90s mode">90s</button>
     <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
   </div>
 </header>
