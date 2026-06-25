@@ -122,12 +122,20 @@ html.retro .photo::after{
 #retro-layer .rl-guestbook{display:inline-block;margin:8px;color:#ff00ff!important;font-weight:bold;
   animation:retro-blink 0.8s steps(1) infinite;}
 
-/* The toggle becomes a pinned, always-on-top "Now" escape hatch in retro mode. */
+/* The toggle becomes a pinned, always-on-top escape hatch in retro mode — its
+   label is swapped to "« BACK TO 2026" by retro.js. It hard-flashes colors
+   (never opacity, so it stays visible + clickable) to scream "click me to leave". */
 html.retro .retro-toggle{
   position:fixed!important;top:34px;right:14px;z-index:99999;
-  background:linear-gradient(#fff,#aaa)!important;color:#000080!important;
-  border:5px outset #fff!important;font:bold 16px var(--font-ui)!important;padding:8px 14px!important;
-  animation:retro-blink 1.3s steps(1) infinite;}
+  border:5px outset #fff!important;font:bold 15px var(--font-ui)!important;padding:9px 14px!important;
+  animation:retro-escape 0.6s steps(1) infinite;}
+@keyframes retro-escape{
+  0%{background:#ffff00;color:#ff0000;box-shadow:0 0 0 3px #ff0000,4px 4px 0 #000;}
+  50%{background:#00ff00;color:#0000ff;box-shadow:0 0 0 3px #0000ff,4px 4px 0 #000;}}
+/* reduced-motion: don't flash, but keep it loud + obviously the exit */
+@media (prefers-reduced-motion: reduce){
+  html.retro .retro-toggle{animation:none!important;background:#ffff00!important;color:#ff0000!important;}
+}
 
 /* ---- animations -------------------------------------------------------- */
 @keyframes retro-spin{to{transform:rotate(360deg);}}

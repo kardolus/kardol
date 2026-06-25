@@ -82,6 +82,8 @@
   }
 
   window.applyRetro = function (on) {
+    var btn = document.querySelector(".retro-toggle");
+    if (btn) btn.textContent = on ? "« BACK TO 2026" : "90s";
     if (on) {
       document.title = RETRO_TITLE;
       if (!document.getElementById("retro-layer")) build();
