@@ -344,7 +344,7 @@
   var S3='https://s3.kardol.us/kardol-photos/v1';
   var G=[
     {s:'sail',     l:'Sailing',     e:'⛵', n:7, c:'happiest with better wind than Wi-Fi'},
-    {s:'bike',     l:'Cycling',     e:'🚲', n:5, c:'two wheels through the boroughs'},
+    {s:'bike',     l:'Cycling',     e:'🚲', n:6, o:[6,1,2,3,4,5], c:'two wheels through the boroughs'},
     {s:'run',      l:'Running',     e:'🏃', n:3, c:'waterfront loops & the odd half-marathon'},
     {s:'woodwork', l:'Woodworking', e:'🪚', n:7, c:'weekend joinery and sawdust'},
     {s:'metal',    l:'Metalwork',   e:'⚒️', n:3, c:'sparks, steel, and stubbornness'},
@@ -355,9 +355,12 @@
   ];
   var pad=function(i){return (i<10?'0':'')+i;};
   var url=function(s,i,z){return S3+'/'+s+'/'+s+'-'+pad(i)+'-'+z+'.webp';};
+  // Display order: `o` lists file numbers when a newer photo should come first (files are cached
+  // immutable, so photos are never renumbered); otherwise 1..n.
+  var nums=function(c){if(c.o)return c.o; var a=[]; for(var i=1;i<=c.n;i++)a.push(i); return a;};
   var wrap=document.getElementById('photos');
   wrap.innerHTML=G.map(function(c){return '<button class="photo" data-cat="'+c.s+'" aria-label="'+c.l+' photos ('+c.n+')">'+
-    '<img src="'+url(c.s,1,'800')+'" loading="lazy" alt="'+c.l+'">'+
+    '<img src="'+url(c.s,nums(c)[0],'800')+'" loading="lazy" alt="'+c.l+'">'+
     '<span class="scrim"></span>'+
     '<span class="ph-meta"><b>'+c.l+'</b><span>'+c.c+' · '+c.n+' photos</span></span>'+
     '<span class="ph-badge">'+c.e+'</span></button>';}).join('');
@@ -374,8 +377,8 @@
     [idx+1,idx-1].forEach(function(k){var m=(k+items.length)%items.length; new Image().src=items[m];});
   }
   function open(slug){ cat=G.filter(function(c){return c.s===slug;})[0]; if(!cat)return;
-    items=[]; for(var i=1;i<=cat.n;i++) items.push(url(slug,i,'1600'));
-    strip.innerHTML=items.map(function(_,j){return '<img src="'+url(slug,j+1,'800')+'" loading="lazy" alt="" data-i="'+j+'">';}).join('');
+    items=nums(cat).map(function(i){return url(slug,i,'1600');});
+    strip.innerHTML=items.map(function(_,j){return '<img src="'+url(slug,nums(cat)[j],'800')+'" loading="lazy" alt="" data-i="'+j+'">';}).join('');
     lastFocus=document.activeElement; lb.hidden=false;
     others().forEach(function(el){el.inert=true;});
     document.addEventListener('keydown',onKey); show(0);
