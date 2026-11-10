@@ -94,6 +94,21 @@
   .steps b{font-family:var(--font-ui)}
   .steps p{margin:4px 0 0;color:var(--meta);font-size:13px}
   .doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px}
+  /* alerting tracks */
+  .tracks{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .track{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);padding:16px 18px}
+  .track h3{font-size:16px;margin-bottom:2px}
+  .track .meta{margin-bottom:10px}
+  .vsteps{list-style:none;margin:0;padding:0;counter-reset:v}
+  .vsteps li{counter-increment:v;position:relative;padding:0 0 14px 34px;font-size:14px}
+  .vsteps li:last-child{padding-bottom:0}
+  .vsteps li::before{content:counter(v);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:999px;
+    display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-ui);font-weight:700;font-size:12px;color:#fff;background:var(--tc)}
+  html.dark .vsteps li::before{color:#0d1117}
+  .vsteps li:not(:last-child)::after{content:"";position:absolute;left:10.5px;top:24px;bottom:2px;width:1px;background:var(--border-strong)}
+  .vsteps b{font-family:var(--font-ui)}
+  .vsteps p{margin:2px 0 0;color:var(--meta);font-size:13px}
+  .track.t-alert{--tc:var(--warn)} .track.t-dead{--tc:var(--bad)}
   /* k8s config */
   .cfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
   .cfg .card h3{font-size:16px;margin-bottom:6px}
@@ -132,6 +147,7 @@
       <a href="#hardware">Hardware</a>
       <a href="#map">Map</a>
       <a href="#auth">Sign-in</a>
+      <a href="#alerts">Alerts</a>
       <a href="#k8s">Cluster</a>
       <a class="always" href="#live">Dashboard</a>
     </nav>
@@ -304,7 +320,7 @@
     <div class="row r3">
       <div class="box plat"><h4>Backups, 3-2-1</h4><p>Nightly <code>pg_dump</code> of every unique DB, plus an etcd snapshot, into restic on the cold drive. The irreplaceable subset also goes to Cloudflare R2. A weekly re-read of the data catches bit-rot.</p></div>
       <div class="box plat"><h4>Images &amp; CI</h4><p>Images are built on forge and pushed to GHCR, then pulled with a cluster secret. One app deploys from GitHub Actions on a self-hosted runner that holds a deploy-only, namespace-scoped account.</p></div>
-      <div class="box plat"><h4>Paging</h4><p>Critical alerts go to PagerDuty, waking me only in daytime hours. A dead-man's switch on Healthchecks.io pages if the monitoring itself goes quiet.</p></div>
+      <div class="box plat"><h4>Paging</h4><p>Critical alerts go to PagerDuty. A dead-man's switch on Healthchecks.io pages if forge stops reporting in at all. <a href="#alerts">How that works ↓</a></p></div>
     </div>
   </div>
 </div>
@@ -325,6 +341,34 @@
   <div class="box sso"><h4>AI clients</h4><p>MCP servers (Studio, workbench, Foreman, Nemo) take OAuth tokens from Keycloak, limited by scope and group membership. Claude, ChatGPT and Codex each get their own client.</p></div>
   <div class="box own"><h4>Machines</h4><p>The iPhone health exporter posts with a bearer token. Foreman's sandboxed agents get no cluster credentials at all, and the orchestrator holds every key.</p></div>
   <div class="box own"><h4>Break-glass</h4><p>Grafana, MinIO and Immich keep a local admin stored in a password manager, so a Keycloak outage can't lock me out.</p></div>
+</div>
+
+<!-- ALERTS -->
+<h2 class="sh" id="alerts">When something breaks</h2>
+<p class="sh-sub">Two separate paths, because a box that's on fire can't be trusted to report its own fire. The first catches problems while forge is up. The second catches forge itself going dark.</p>
+<div class="tracks">
+  <div class="track t-alert">
+    <h3>An app or the node misbehaves</h3>
+    <div class="meta">forge notices, and tells me</div>
+    <ol class="vsteps">
+      <li><b>Something is watching</b><p>Blackbox probes load every public URL from inside the cluster. Exporters report on the node, pods, databases, tunnels and backups.</p></li>
+      <li><b>A rule fires</b><p>Prometheus evaluates about 250 alert rules every 30 seconds: site down, ingest stalled, disk filling, backup stale, a certificate about to expire.</p></li>
+      <li><b>Alertmanager sorts it</b><p>It groups related alerts, and a critical alert suppresses the warnings it causes, so one outage is one page and not twenty.</p></li>
+      <li><b>Critical → PagerDuty</b><p>Critical alerts open a PagerDuty incident on my phone. Warnings stay on the dashboard for me to look at later.</p></li>
+      <li><b>Resolved → closed</b><p>When the rule clears, Alertmanager resolves the incident automatically.</p></li>
+    </ol>
+  </div>
+  <div class="track t-dead">
+    <h3>forge itself goes dark</h3>
+    <div class="meta">silence is the alarm: the dead-man's switch</div>
+    <ol class="vsteps">
+      <li><b>An alert that always fires</b><p>Prometheus carries a rule called Watchdog that is permanently firing. It means "the alerting pipeline works".</p></li>
+      <li><b>A heartbeat</b><p>Alertmanager sends Watchdog to Healthchecks.io, an outside service, every 5 minutes, and each delivery checks in.</p></li>
+      <li><b>The heartbeat stops</b><p>A power cut, a dead disk, a crashed Prometheus or a home internet outage all look the same from outside: the check-ins stop.</p></li>
+      <li><b>Healthchecks.io pages</b><p>After 10 minutes without a check-in, Healthchecks.io opens a PagerDuty incident itself. Nothing on forge has to be alive for that to happen.</p></li>
+      <li><b>Back up → resolved</b><p>When forge comes back (BIOS powers it on after an outage), the heartbeat resumes and the incident closes.</p></li>
+    </ol>
+  </div>
 </div>
 
 <!-- K8S CONFIG -->
