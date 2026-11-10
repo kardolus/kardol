@@ -107,11 +107,9 @@
   .dash-bar .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pub);animation:pulse 2s infinite}
   @keyframes pulse{50%{opacity:.35}}
   @media (prefers-reduced-motion:reduce){.dash-bar .live::before{animation:none}}
-  .dash-bar a{margin-left:auto;color:var(--meta)}
-  .dash iframe{display:block;width:100%;height:760px;border:0;background:var(--bg)}
-  @media(max-width:760px){.dash iframe{height:1900px}}
-  .dash-fallback{display:none;padding:12px}
-  .dash-fallback img{width:100%;height:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+  .dash-shot{display:block;background:var(--bg)}
+  .dash-shot img{display:block;width:100%;height:auto}
+  .dash-bar .live.stale{color:var(--warn)} .dash-bar .live.stale::before{background:var(--warn);animation:none}
   .prose{max-width:760px;font-size:15px}
   .prose p{margin:0 0 10px}
   .foot{margin-top:48px}
@@ -135,7 +133,7 @@
       <a href="#map">Map</a>
       <a href="#auth">Sign-in</a>
       <a href="#k8s">Cluster</a>
-      <a class="always" href="#live">Live</a>
+      <a class="always" href="#live">Dashboard</a>
     </nav>
     <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
   </div>
@@ -193,7 +191,7 @@
 
 <!-- ARCHITECTURE -->
 <h2 class="sh" id="map">The map</h2>
-<p class="sh-sub">Read it top to bottom, the way a request travels. Nothing on forge accepts inbound connections from the internet. Cloudflare tunnels dial <em>out</em> and carry traffic back in, so the router has no ports open.</p>
+<p class="sh-sub">Read it top to bottom, the way a request travels. Nothing on forge accepts inbound connections from the internet. Cloudflare tunnels dial <em>out</em> and carry web traffic back in, so the router forwards no web ports. The one thing listening at home is WireGuard, which stays silent to anyone without a key.</p>
 <div class="legend">
   <span><i class="sw pub"></i>public</span>
   <span><i class="sw sso"></i>sign-in required (Keycloak SSO)</span>
@@ -370,9 +368,9 @@
   <div class="card">
     <h3>Observability</h3>
     <ul>
-      <li><b>kube-prometheus-stack</b> from a single umbrella Helm chart: 90-day retention, nightly TSDB snapshots to MinIO.</li>
+      <li><b>kube-prometheus-stack</b> from a single umbrella Helm chart: 90-day retention, nightly TSDB snapshots into the restic backup.</li>
       <li><b>Blackbox probes</b> hit every public URL from inside. 25 Service/PodMonitors scrape the apps, 7 Postgres exporters watch the databases.</li>
-      <li>A dozen hand-built Grafana dashboards, each panel with an explanation. The one below is a public copy of the home board.</li>
+      <li>A dozen hand-built Grafana dashboards, each panel with an explanation. The one below is a trimmed copy of the home board, rendered to an image every five minutes.</li>
     </ul>
   </div>
   <div class="card">
@@ -386,13 +384,17 @@
 </div>
 
 <!-- LIVE -->
-<h2 class="sh" id="live">Live: forge watching itself</h2>
-<p class="sh-sub">The real Grafana home board, shared read-only and updating every minute. See the <b>kardol</b> line in the ingress chart? Your visit is in it.</p>
+<h2 class="sh" id="live">forge watching itself</h2>
+<p class="sh-sub">The Grafana home board, screenshotted inside the cluster every five minutes. Visitors only ever load the picture, never Grafana itself. Look for the <b>kardol.us</b> line in the ingress chart: your visit will be in the next frame.</p>
 <div class="dash">
-  <div class="dash-bar"><span class="live">live</span><span>grafana.kardol.us · last 6 hours</span><a href="https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1" target="_blank" rel="noopener">open full screen ↗</a></div>
-  <iframe id="dash" title="forge live Grafana dashboard" loading="lazy" referrerpolicy="no-referrer"
-    src="https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1?theme=light"></iframe>
-  <noscript><div style="padding:12px"><img src="https://s3.kardol.us/kardol-photos/v1/forge/forge-dashboard.webp" alt="Screenshot of the forge Grafana home dashboard" style="width:100%;height:auto"></div></noscript>
+  <div class="dash-bar"><span class="live" id="dash-age">rendered every 5 min</span><span>grafana.kardol.us · last 6 hours</span></div>
+  <a class="dash-shot" id="dash-link" href="https://s3.kardol.us/kardol-photos/v1/forge/live/forge-desktop-light.webp" target="_blank" rel="noopener">
+    <picture>
+      <source id="dash-src-phone" media="(max-width: 640px)" width="420" height="2788" srcset="https://s3.kardol.us/kardol-photos/v1/forge/live/forge-phone-light.webp">
+      <img id="dash-img" src="https://s3.kardol.us/kardol-photos/v1/forge/live/forge-desktop-light.webp" width="1440" height="662" decoding="async"
+        alt="forge's Grafana home board: health boxes for auth, bart, many-paths, MinIO, kardol, citibike and crashes; alert counts; CPU, memory and disk gauges; certificate expiry; container restarts; ingress requests per second for public sites with the overall 5xx rate; and node pressure.">
+    </picture>
+  </a>
 </div>
 
 <footer class="foot" id="contact">
@@ -405,15 +407,31 @@
 </footer>
 
 <script>
+// Screenshots of the Grafana home board, re-rendered every 5 min inside the cluster
+// (desktop grid + phone column, light + dark). meta.json says when; its timestamp
+// cache-busts the images because Cloudflare holds them for hours otherwise.
 (function(){
-  var f = document.getElementById('dash');
-  var base = 'https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1';
-  window.setDashTheme = function(){
+  var B = 'https://s3.kardol.us/kardol-photos/v1/forge/live/';
+  var img = document.getElementById('dash-img'), phone = document.getElementById('dash-src-phone'),
+      link = document.getElementById('dash-link'), age = document.getElementById('dash-age');
+  var v = String(Math.floor(Date.now() / 300000)), renderedAt = null;
+  function apply(){
     var t = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-    var want = base + '?theme=' + t;
-    if (f.src !== want) f.src = want;
-  };
-  window.setDashTheme();
+    img.src = B + 'forge-desktop-' + t + '.webp?v=' + v;
+    phone.srcset = B + 'forge-phone-' + t + '.webp?v=' + v;
+    link.href = (matchMedia('(max-width: 640px)').matches ? B + 'forge-phone-' : B + 'forge-desktop-') + t + '.webp?v=' + v;
+  }
+  function tick(){
+    if (!renderedAt) return;
+    var m = Math.round((Date.now() - renderedAt) / 60000);
+    age.textContent = m < 1 ? 'rendered just now' : 'rendered ' + m + ' min ago';
+    age.classList.toggle('stale', m > 20);
+  }
+  window.setDashTheme = apply;
+  apply();
+  fetch(B + 'meta.json?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(m){
+    renderedAt = Date.parse(m.rendered_at); v = String(renderedAt); apply(); tick(); setInterval(tick, 30000);
+  }).catch(function(){});
 })();
 </script>
 </body>
