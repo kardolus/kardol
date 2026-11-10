@@ -4,6 +4,7 @@ COPY site/ /usr/share/nginx/html
 # small tweak: long cache for static assets, no-cache for the HTML entrypoint
 RUN printf 'server {\n\
   listen 80;\n\
+  absolute_redirect off;\n\
   root /usr/share/nginx/html;\n\
   index index.html;\n\
   location = /index.html { add_header Cache-Control "no-cache"; }\n\

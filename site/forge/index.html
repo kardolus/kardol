@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>forge — the homelab</title>
+<meta name="description" content="How forge, Guillermo Kardolus's basement Kubernetes homelab, is wired: hardware, cluster configuration, every service, how sign-in works, where the data lives — plus its live Grafana dashboard.">
+<meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="forge — the homelab">
+<meta property="og:description" content="A single-node Kubernetes cluster in a Brooklyn basement: hardware, cluster config, every service, SSO, and its live dashboard.">
+<meta property="og:image" content="https://kardol.us/img/og.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=26">
+<script>
+  var _t; try { _t = localStorage.getItem('theme'); } catch (e) {}
+  document.documentElement.classList.toggle('dark', _t ? _t === 'dark' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches));
+  function toggleDark(){
+    var dark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    if (window.setDashTheme) window.setDashTheme();
+  }
+</script>
+<script defer src="https://analytics.kardol.us/script.js" data-website-id="315018e0-6e4e-4916-bc46-55ad40b65df6"></script>
+<style>
+  :root{--pub:#1da46c;--sso:#6a55d8;--own:#c27a00;--plat:#5b6b7f;--pub-soft:#1da46c14;--sso-soft:#6a55d814;--own-soft:#c27a0014;--plat-soft:#5b6b7f14}
+  html.dark{--pub:#22c47e;--sso:#a493ff;--own:#e3b341;--plat:#9aa7b6;--pub-soft:#22c47e14;--sso-soft:#a493ff17;--own-soft:#e3b34114;--plat-soft:#9aa7b614}
+  .crumb{font-family:var(--font-ui);font-size:14px;color:var(--meta)}
+  .crumb a{color:var(--meta)} .crumb a:hover{color:var(--fg)}
+  .fhero{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);padding:28px 28px 24px;margin:14px 0 18px}
+  .fhero h1{font-size:clamp(28px,5vw,40px);letter-spacing:-.01em}
+  .fhero .lede{font-size:17px;max-width:720px;margin:10px 0 0;color:var(--fg)}
+  .fhero .sub{color:var(--meta);font-size:14px;margin-top:8px;max-width:720px}
+  .fkpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:20px}
+  .fkpis .kpi{padding:12px 14px}
+  .fkpis .kpi-n{font-size:26px}
+  h2.sh{font-size:22px;margin:40px 0 6px}
+  .sh-sub{color:var(--meta);margin:0 0 16px;max-width:760px}
+  /* spec sheet */
+  .specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .spec{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);padding:16px 18px}
+  .spec h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--meta);margin-bottom:8px}
+  .spec dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:14px}
+  .spec dt{color:var(--meta);white-space:nowrap}
+  .spec dd{margin:0;min-width:0}
+  /* architecture diagram */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--meta);margin:0 0 14px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;border:2px solid currentColor}
+  .sw.pub{color:var(--pub);background:var(--pub-soft)} .sw.sso{color:var(--sso);background:var(--sso-soft)}
+  .sw.own{color:var(--own);background:var(--own-soft)} .sw.plat{color:var(--plat);background:var(--plat-soft)}
+  .diagram{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);padding:18px}
+  .layer{border:1px dashed var(--border-strong);border-radius:var(--radius-md);padding:14px 14px 12px;position:relative}
+  .layer-t{font-family:var(--font-ui);font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--meta);margin-bottom:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .layer-t b{color:var(--fg);font-weight:600}
+  .flow{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--meta);font-size:12px;font-family:var(--font-mono);padding:8px 0;text-align:center}
+  .flow svg{width:14px;height:22px;flex-shrink:0;color:var(--border-strong)}
+  .row{display:grid;gap:10px}
+  .r2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .r3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .box{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--card);padding:10px 12px;min-width:0}
+  .box h4{font-family:var(--font-ui);font-size:14px;margin:0 0 3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .box p{margin:0;font-size:13px;color:var(--meta);line-height:1.45}
+  .box.pub{border-color:var(--pub);background:var(--pub-soft)} .box.sso{border-color:var(--sso);background:var(--sso-soft)}
+  .box.own{border-color:var(--own);background:var(--own-soft)} .box.plat{border-color:var(--plat);background:var(--plat-soft)}
+  .grp{border-radius:var(--radius-sm);padding:10px;min-width:0}
+  .grp.pub{background:var(--pub-soft);border:1.5px solid var(--pub)} .grp.sso{background:var(--sso-soft);border:1.5px solid var(--sso)} .grp.plat{background:var(--plat-soft);border:1.5px solid var(--plat)}
+  .grp-t{font-family:var(--font-ui);font-weight:600;font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .grp.pub .grp-t{color:var(--pub)} .grp.sso .grp-t{color:var(--sso)} .grp.plat .grp-t{color:var(--plat)}
+  .svc{display:block;border:1px solid var(--border);background:var(--card);border-radius:6px;padding:6px 9px;margin-top:6px;font-size:13px;line-height:1.35;min-width:0}
+  .svc b{font-family:var(--font-ui);font-weight:600;font-size:13px}
+  .svc .h{font-family:var(--font-mono);font-size:11px;color:var(--meta);overflow-wrap:anywhere}
+  .svc .d{display:block;color:var(--meta);font-size:12px}
+  .svc .own-tag{font-family:var(--font-mono);font-size:10px;color:var(--own);border:1px solid var(--own);border-radius:4px;padding:0 4px;margin-left:4px;white-space:nowrap}
+  .k8s-wrap{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:10px;margin-top:10px}
+  @media(max-width:860px){.k8s-wrap{grid-template-columns:1fr}}
+  .keycloak{border:2px solid var(--sso);border-radius:var(--radius-sm);background:var(--sso-soft);padding:12px;align-self:start;position:sticky;top:70px}
+  @media(max-width:860px){.keycloak{position:static}}
+  .keycloak h4{font-family:var(--font-ui);font-size:15px;margin:0 0 2px;color:var(--sso)}
+  .keycloak ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--meta)}
+  .keycloak li{margin:3px 0}
+  .ingress{border:1.5px solid var(--plat);background:var(--plat-soft);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .ingress b{font-family:var(--font-ui)}
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .pill{font-family:var(--font-mono);font-size:11px;border:1px solid var(--border-strong);border-radius:999px;padding:2px 8px;color:var(--meta);background:var(--card)}
+  /* auth flow */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;counter-reset:s;margin:0;padding:0;list-style:none}
+  .steps li{counter-increment:s;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);padding:14px 14px 12px;font-size:14px;position:relative}
+  .steps li::before{content:counter(s);font-family:var(--font-ui);font-weight:700;font-size:12px;color:#fff;background:var(--sso);border-radius:999px;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px}
+  html.dark .steps li::before{color:#0d1117}
+  .steps b{font-family:var(--font-ui)}
+  .steps p{margin:4px 0 0;color:var(--meta);font-size:13px}
+  .doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px}
+  /* k8s config */
+  .cfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .cfg .card h3{font-size:16px;margin-bottom:6px}
+  .cfg .card p,.cfg .card ul{font-size:14px;color:var(--meta);margin:0}
+  .cfg .card ul{padding-left:18px} .cfg .card li{margin:3px 0}
+  .cfg code,.prose code{font-family:var(--font-mono);font-size:12px;background:var(--btn-hover);padding:1px 5px;border-radius:4px;color:var(--fg)}
+  /* live dashboard */
+  .dash{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--card)}
+  .dash-bar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--meta)}
+  .dash-bar .live{display:inline-flex;align-items:center;gap:6px;color:var(--pub);font-weight:500}
+  .dash-bar .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pub);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  @media (prefers-reduced-motion:reduce){.dash-bar .live::before{animation:none}}
+  .dash-bar a{margin-left:auto;color:var(--meta)}
+  .dash iframe{display:block;width:100%;height:760px;border:0;background:var(--bg)}
+  @media(max-width:760px){.dash iframe{height:1900px}}
+  .dash-fallback{display:none;padding:12px}
+  .dash-fallback img{width:100%;height:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+  .prose{max-width:760px;font-size:15px}
+  .prose p{margin:0 0 10px}
+  .foot{margin-top:48px}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="compass" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.6l1.9 8.5 8.5 1.9-8.5 1.9-1.9 8.5-1.9-8.5-8.5-1.9 8.5-1.9z"/></symbol>
+  <symbol id="down" viewBox="0 0 14 22"><path d="M7 0v19M1.5 14 7 20l5.5-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<header class="top-bar">
+  <div class="brand"><a href="/" style="display:flex;align-items:center;gap:9px;color:var(--fg)"><svg class="logo"><use href="#compass"/></svg> Guillermo Kardolus</a></div>
+  <div class="top-actions">
+    <nav class="top-nav">
+      <a href="#hardware">Hardware</a>
+      <a href="#map">Map</a>
+      <a href="#auth">Sign-in</a>
+      <a href="#k8s">Cluster</a>
+      <a class="always" href="#live">Live</a>
+    </nav>
+    <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+  </div>
+</header>
+
+<div class="crumb"><a href="/">kardol.us</a> / forge</div>
+
+<section class="fhero">
+  <h1>forge — the homelab</h1>
+  <p class="lede">One Dell tower in a Red Hook basement, running a single-node Kubernetes cluster that serves about forty websites. This page is one of them.</p>
+  <p class="sub">Below is the whole thing: the hardware, every service and who can reach it, how sign-in works, where the data lives, and the cluster's own dashboard, live.</p>
+  <div class="fkpis">
+    <div class="kpi"><div class="kpi-n">1</div><div class="kpi-l">node</div></div>
+    <div class="kpi"><div class="kpi-n">27</div><div class="kpi-l">app namespaces</div></div>
+    <div class="kpi"><div class="kpi-n">68</div><div class="kpi-l">deployments</div></div>
+    <div class="kpi"><div class="kpi-n">43</div><div class="kpi-l">hostnames</div></div>
+    <div class="kpi"><div class="kpi-n">20</div><div class="kpi-l">Postgres DBs</div></div>
+    <div class="kpi"><div class="kpi-n">254</div><div class="kpi-l">alert rules</div></div>
+  </div>
+</section>
+
+<!-- HARDWARE -->
+<h2 class="sh" id="hardware">The box</h2>
+<p class="sh-sub">Bought as a desktop and given a job as a server. It powers back on by itself after an outage, and it's been up for months at a time.</p>
+<div class="specs">
+  <div class="spec">
+    <h3>Machine</h3>
+    <dl>
+      <dt>Model</dt><dd>Dell Pro Tower (ECT1250)</dd>
+      <dt>CPU</dt><dd>Intel Core Ultra 7 265 (Arrow Lake), 20 cores: 8 P + 12 E</dd>
+      <dt>Memory</dt><dd>32 GB DDR5</dd>
+      <dt>GPU</dt><dd>Intel Arc integrated (unused, for now)</dd>
+      <dt>Network</dt><dd>1 GbE wired, static on the LAN</dd>
+    </dl>
+  </div>
+  <div class="spec">
+    <h3>Storage</h3>
+    <dl>
+      <dt>Hot</dt><dd>1 TB NVMe (SanDisk SN5000S): OS, containers, databases, object storage</dd>
+      <dt>Cold</dt><dd>8 TB LaCie d2 USB HDD: backup repository, photo/file originals, archives</dd>
+      <dt>Offsite</dt><dd>Cloudflare R2: encrypted copy of what can't be recreated</dd>
+    </dl>
+  </div>
+  <div class="spec">
+    <h3>Software</h3>
+    <dl>
+      <dt>OS</dt><dd>Ubuntu 24.04 LTS, kernel 6.8</dd>
+      <dt>Kubernetes</dt><dd>v1.35 via kubeadm</dd>
+      <dt>Runtime</dt><dd>containerd 2.2 (its own instance, separate from Docker)</dd>
+      <dt>Docker</dt><dd>runs the stateful bits next to the cluster</dd>
+      <dt>Router</dt><dd>OPNsense: AdGuard DNS, WireGuard, Tailscale</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<h2 class="sh" id="map">The map</h2>
+<p class="sh-sub">Read it top to bottom, the way a request travels. Nothing on forge accepts inbound connections from the internet. Cloudflare tunnels dial <em>out</em> and carry traffic back in, so the router has no ports open.</p>
+<div class="legend">
+  <span><i class="sw pub"></i>public</span>
+  <span><i class="sw sso"></i>sign-in required (Keycloak SSO)</span>
+  <span><i class="sw own"></i>its own login / token</span>
+  <span><i class="sw plat"></i>platform plumbing</span>
+</div>
+
+<div class="diagram" role="img" aria-label="Architecture of forge: internet traffic enters through Cloudflare tunnels into ingress-nginx on a single Kubernetes node; apps are grouped as public, sign-in required, and platform; Keycloak handles sign-in; state lives in host-side Postgres containers, MinIO and a cold drive, backed up to Cloudflare R2.">
+
+  <div class="layer">
+    <div class="layer-t"><b>1 · Edge</b><span>how you get in</span></div>
+    <div class="row r2">
+      <div class="box plat">
+        <h4><svg width="14" height="14"><use href="#globe"/></svg> Cloudflare</h4>
+        <p>DNS for kardol.us and nemo.town, TLS, caching. Three outbound <b>tunnels</b>: <span class="mono">platform</span> (almost everything), <span class="mono">bart</span>, and a sidecar inside many-paths.</p>
+      </div>
+      <div class="box plat">
+        <h4><svg width="14" height="14"><use href="#lock"/></svg> Private paths</h4>
+        <p>From the house, or from anywhere over <b>WireGuard</b> (on the OPNsense router) or <b>Tailscale</b>: straight to the LAN. Phone photo backups use this path so big videos skip Cloudflare's upload cap.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg><use href="#down"/></svg>tunnel → ingress-nginx · port 80 on the node · routed by hostname</div>
+
+  <div class="layer">
+    <div class="layer-t"><b>2 · Kubernetes on forge</b><span>27 app namespaces · 68 deployments</span></div>
+    <div class="ingress"><b>ingress-nginx</b><span class="meta">one controller, one IngressClass, about 40 hostnames, trusts Cloudflare's forwarded headers</span></div>
+
+    <div class="k8s-wrap">
+      <div class="row r3">
+        <div class="grp pub">
+          <div class="grp-t"><svg width="14" height="14"><use href="#globe"/></svg> Public</div>
+          <span class="svc"><b>kardol</b> <span class="h">kardol.us</span><span class="d">this site (nginx, static)</span></span>
+          <span class="svc"><b>bikeshare</b> <span class="h">bikes · citi · divvy · cabi · velib · bicing · boris · ecobici · ecobici-ba</span><span class="d">8 bike-share cities: an ingester and a dashboard per city, plus a hub</span></span>
+          <span class="svc"><b>crashes</b> <span class="h">crashes.kardol.us</span><span class="d">NYC collision map (PostGIS mirror)</span></span>
+          <span class="svc"><b>crime</b> <span class="h">crime.kardol.us</span><span class="d">NYPD complaints map, 10M rows</span></span>
+          <span class="svc"><b>trees</b> <span class="h">trees.kardol.us</span><span class="d">street-tree field guide + atlas</span></span>
+          <span class="svc"><b>cdl</b> <span class="h">cdl.kardol.us</span><span class="d">CDL pre-trip study trainer</span></span>
+          <span class="svc"><b>markets</b> <span class="h">markets.kardol.us</span><span class="d">one-off explainer page</span></span>
+          <span class="svc"><b>many-paths</b> <span class="h">manypaths.kardol.us</span><span class="d">MCP server over a LanceDB corpus in S3</span></span>
+          <span class="svc"><b>analytics</b> <span class="h">analytics · stats</span><span class="d">Umami, cookieless visitor counts, + a cross-site rollup</span><span class="own-tag">dashboard: own login</span></span>
+          <span class="svc"><b>bart</b> <span class="h">bart.kardol.us · ascend-ts-bot.com</span><span class="d">Go API + Next.js app, CI deploys from a self-hosted runner</span><span class="own-tag">admin: SSO</span></span>
+          <span class="svc"><b>studio</b> <span class="h">studio.kardol.us</span><span class="d">projects &amp; design docs; public pages, the rest signed in</span><span class="own-tag">mixed</span></span>
+        </div>
+
+        <div class="grp sso">
+          <div class="grp-t"><svg width="14" height="14"><use href="#lock"/></svg> Sign-in required</div>
+          <span class="svc"><b>grafana</b> <span class="h">grafana.kardol.us</span><span class="d">dashboards &amp; alerting</span></span>
+          <span class="svc"><b>photos</b> <span class="h">photos.kardol.us</span><span class="d">Immich: family photo library</span></span>
+          <span class="svc"><b>drive</b> <span class="h">drive.kardol.us</span><span class="d">OpenCloud: family file sync + share links</span></span>
+          <span class="svc"><b>s3 console</b> <span class="h">s3-console.kardol.us</span><span class="d">MinIO admin</span></span>
+          <span class="svc"><b>workbench</b> <span class="h">workbench.kardol.us</span><span class="d">MCP: multi-model huddles &amp; code reviews</span></span>
+          <span class="svc"><b>foreman</b> <span class="h">foreman.kardol.us</span><span class="d">idea → reviewed draft PR, agents in a locked-down sandbox namespace</span></span>
+          <span class="svc"><b>term</b> <span class="h">term.kardol.us</span><span class="d">browser terminal for coding agents</span></span>
+          <span class="svc"><b>ringer</b> <span class="h">ringer.kardol.us</span><span class="d">AI phone-call agent + speech-to-text</span></span>
+          <span class="svc"><b>health</b> <span class="h">health.kardol.us</span><span class="d">personal health dashboard</span><span class="own-tag">ingest: token</span></span>
+          <span class="svc"><b>nemo admin</b> <span class="h">admin.nemo.town</span><span class="d">Nemo product analytics + MCP</span></span>
+          <span class="svc"><b>+ a few personal tools</b><span class="d">owner-only, kept off this map</span></span>
+        </div>
+
+        <div class="grp plat">
+          <div class="grp-t"><svg width="14" height="14"><use href="#cog"/></svg> Platform</div>
+          <span class="svc"><b>auth</b> <span class="h">auth.kardol.us · auth.nemo.town</span><span class="d">Keycloak, the single sign-in for everything</span></span>
+          <span class="svc"><b>nemo</b> <span class="h">sync · places · mcp .nemo.town</span><span class="d">backend for the Nemo Places iOS app; app users sign in through the nemo realm</span></span>
+          <span class="svc"><b>monitoring</b><span class="d">Prometheus, Alertmanager, Grafana, blackbox probes, node &amp; Postgres exporters</span></span>
+          <span class="svc"><b>storage</b><span class="d">in-cluster name for MinIO (S3) on the host</span></span>
+          <span class="svc"><b>ingress-nginx · flannel · local-path · metrics-server · cloudflared</b><span class="d">networking, volumes, autoscaling metrics, tunnels</span></span>
+        </div>
+      </div>
+
+      <aside class="keycloak">
+        <h4>Keycloak</h4>
+        <div class="meta" style="font-size:12px">auth.kardol.us · OIDC · its own Postgres</div>
+        <ul>
+          <li><b>homelab</b> realm: the household. Google sign-in, <em>pre-created accounts only</em>.</li>
+          <li><b>nemo</b> realm: outside people. Nemo app users and Studio guests.</li>
+          <li>One client per app. Each app also keeps its own email allow-list.</li>
+          <li>OAuth for MCP clients (Claude, ChatGPT, Codex) through scopes + groups.</li>
+          <li>Client credentials for service-to-service calls (Foreman → Studio, workbench).</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <div class="flow"><svg><use href="#down"/></svg>pods stay stateless · state lives outside the cluster on the same box</div>
+
+  <div class="layer">
+    <div class="layer-t"><b>3 · State on the host</b><span>Docker containers + disks, reached through selector-less Services</span></div>
+    <div class="row r3">
+      <div class="box plat">
+        <h4>20 × Postgres 16</h4>
+        <p>One container per app, never shared: 8 TimescaleDB (bike-share time series, compressed hypertables), 3 PostGIS (maps), 1 VectorChord (photo search), 8 plain. Apps connect as read-only roles wherever they can.</p>
+      </div>
+      <div class="box plat">
+        <h4>MinIO (S3)</h4>
+        <p>Versioned buckets for backups and app data, a public bucket for this site's photos, Prometheus snapshots. Also served at <span class="mono">s3.kardol.us</span>.</p>
+      </div>
+      <div class="box plat">
+        <h4>Disks</h4>
+        <p>NVMe for everything live. The 8 TB cold drive holds photo and file originals, mounted with fail-safes: if the drive is missing, the pods refuse to start.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow"><svg><use href="#down"/></svg>nightly, encrypted, checked</div>
+
+  <div class="layer">
+    <div class="layer-t"><b>4 · Off the box</b><span>backups, images, paging</span></div>
+    <div class="row r3">
+      <div class="box plat"><h4>Backups, 3-2-1</h4><p>Nightly <code>pg_dump</code> of every unique DB, plus an etcd snapshot, into restic on the cold drive. The irreplaceable subset also goes to Cloudflare R2. A weekly re-read of the data catches bit-rot.</p></div>
+      <div class="box plat"><h4>Images &amp; CI</h4><p>Images are built on forge and pushed to GHCR, then pulled with a cluster secret. One app deploys from GitHub Actions on a self-hosted runner that holds a deploy-only, namespace-scoped account.</p></div>
+      <div class="box plat"><h4>Paging</h4><p>Critical alerts go to PagerDuty, waking me only in daytime hours. A dead-man's switch on Healthchecks.io pages if the monitoring itself goes quiet.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<h2 class="sh" id="auth">How sign-in works</h2>
+<p class="sh-sub">Every private app sends you through the same door. Google proves who you are, Keycloak checks that you're on the guest list, and the app checks again.</p>
+<ol class="steps">
+  <li><b>You open an app</b><p>e.g. photos.kardol.us. With no session, it redirects you to Keycloak with an OIDC request.</p></li>
+  <li><b>Keycloak → Google</b><p>The homelab realm skips its own login page and hands you straight to Google.</p></li>
+  <li><b>Guest-list check</b><p>Back from Google, Keycloak links you <em>only</em> to an account that already exists. Unknown Google accounts are turned away. Nobody can sign themselves up.</p></li>
+  <li><b>Code → tokens</b><p>The app trades the authorization code for tokens server-side, using its own client secret.</p></li>
+  <li><b>App allow-list</b><p>Each app also checks your email against its own list (Grafana admin, the health dashboard and the terminal accept one person).</p></li>
+  <li><b>Session</b><p>A signed cookie keeps you in. SSO sessions last up to 30 days, so one Google sign-in covers every app.</p></li>
+</ol>
+<div class="doors">
+  <div class="box sso"><h4>Guests</h4><p>People outside the house (Nemo app users, someone a Studio page is shared with) sign in through a separate <b>nemo</b> realm. A guest can never become a homelab user.</p></div>
+  <div class="box sso"><h4>AI clients</h4><p>MCP servers (Studio, workbench, Foreman, Nemo) take OAuth tokens from Keycloak, limited by scope and group membership. Claude, ChatGPT and Codex each get their own client.</p></div>
+  <div class="box own"><h4>Machines</h4><p>The iPhone health exporter posts with a bearer token. Foreman's sandboxed agents get no cluster credentials at all, and the orchestrator holds every key.</p></div>
+  <div class="box own"><h4>Break-glass</h4><p>Grafana, MinIO and Immich keep a local admin stored in a password manager, so a Keycloak outage can't lock me out.</p></div>
+</div>
+
+<!-- K8S CONFIG -->
+<h2 class="sh" id="k8s">How the cluster is set up</h2>
+<p class="sh-sub">Deliberately boring: vanilla upstream Kubernetes, one node, no service mesh, no operators the job doesn't need. The cluster can be rebuilt from git. The data is what gets backed up.</p>
+<div class="cfg">
+  <div class="card">
+    <h3>Control plane &amp; runtime</h3>
+    <ul>
+      <li><b>kubeadm</b>, single node: control plane and workloads share the box (the control-plane taint is removed).</li>
+      <li>A <b>dedicated containerd</b> with its own socket and systemd unit, isolated from Docker on the same host.</li>
+      <li>Scheduler and controller-manager metrics exposed so Prometheus can scrape the control plane.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Networking</h3>
+    <ul>
+      <li><b>Flannel</b> CNI (VXLAN) pinned to the wired NIC. Pod CIDR 10.244/16, Services 10.96/12.</li>
+      <li><b>ingress-nginx</b> as a DaemonSet on hostPort 80. TLS ends at Cloudflare, and the tunnel speaks plain HTTP inside.</li>
+      <li><b>cloudflared</b> runs as Deployments (and one sidecar). There's no LoadBalancer, and none is needed.</li>
+      <li>Host services (Postgres, MinIO) reach pods through <b>selector-less Services + Endpoints</b>, so apps use normal cluster DNS names.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Storage</h3>
+    <ul>
+      <li><b>local-path-provisioner</b> is the default StorageClass, for the few things that need a PVC (Prometheus, caches).</li>
+      <li>Big originals sit on <b>hostPath</b> volumes of type <code>Directory</code>: if the cold drive isn't mounted, the pod won't start, so it never writes to the wrong disk.</li>
+      <li>Databases live outside Kubernetes on purpose: upgrades, dumps and restores stay plain Docker + <code>pg_dump</code>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Workloads &amp; delivery</h3>
+    <ul>
+      <li>One <b>namespace per app</b>, each with its own Secrets and a GHCR pull secret. Images are pinned by tag.</li>
+      <li><b>CronJobs</b> for data work: nightly ingests of NYC open data, pruning that archives before it deletes, Prometheus snapshots to S3.</li>
+      <li>Manifests live in each app's repo. A private infra repo holds the cluster bootstrap, host compose files, secret recreation, and a bare-metal recovery runbook.</li>
+      <li>Agent sandbox: a separate namespace, no service-account token, read-only root filesystem, a non-root UID.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Observability</h3>
+    <ul>
+      <li><b>kube-prometheus-stack</b> from a single umbrella Helm chart: 90-day retention, nightly TSDB snapshots to MinIO.</li>
+      <li><b>Blackbox probes</b> hit every public URL from inside. 25 Service/PodMonitors scrape the apps, 7 Postgres exporters watch the databases.</li>
+      <li>A dozen hand-built Grafana dashboards, each panel with an explanation. The one below is a public copy of the home board.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Resilience (single-node edition)</h3>
+    <ul>
+      <li>BIOS powers the box back on after an outage. A static IP and a DHCP reservation keep its address stable.</li>
+      <li>Each night: an etcd snapshot (cluster state, including Secrets) plus PKI and DB dumps into restic, with the critical subset offsite.</li>
+      <li>No HA, by choice. When it's down, it pages me, and recovery is a reboot or a documented rebuild.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- LIVE -->
+<h2 class="sh" id="live">Live: forge watching itself</h2>
+<p class="sh-sub">The real Grafana home board, shared read-only and updating every minute. See the <b>kardol</b> line in the ingress chart? Your visit is in it.</p>
+<div class="dash">
+  <div class="dash-bar"><span class="live">live</span><span>grafana.kardol.us · last 6 hours</span><a href="https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1" target="_blank" rel="noopener">open full screen ↗</a></div>
+  <iframe id="dash" title="forge live Grafana dashboard" loading="lazy" referrerpolicy="no-referrer"
+    src="https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1?theme=light"></iframe>
+  <noscript><div style="padding:12px"><img src="https://s3.kardol.us/kardol-photos/v1/forge/forge-dashboard.webp" alt="Screenshot of the forge Grafana home dashboard" style="width:100%;height:auto"></div></noscript>
+</div>
+
+<footer class="foot" id="contact">
+  <span>Made in Red Hook, Brooklyn · self-hosted on <span class="mono">forge</span> · <a href="/">← back to kardol.us</a></span>
+  <span class="links">
+    <a href="https://github.com/kardolus">GitHub</a>
+    <a href="https://www.linkedin.com/in/guillermokardolus/">LinkedIn</a>
+    <a href="mailto:kardol@kardol.us">Email</a>
+  </span>
+</footer>
+
+<script>
+(function(){
+  var f = document.getElementById('dash');
+  var base = 'https://grafana.kardol.us/public-dashboards/b9a245a97104442bb1f9e2803a1953c1';
+  window.setDashTheme = function(){
+    var t = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    var want = base + '?theme=' + t;
+    if (f.src !== want) f.src = want;
+  };
+  window.setDashTheme();
+})();
+</script>
+</body>
+</html>

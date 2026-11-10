@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=25">
+<link rel="stylesheet" href="/style.css?v=26">
 <link rel="stylesheet" href="/retro.css?v=2">
 <script>
   // apply saved theme before paint to avoid a flash
@@ -219,11 +219,11 @@
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
   </article>
 
-  <article class="card peek-card" data-peek="forge">
-    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-server"/></svg> forge — the homelab</h3></div>
+  <article class="card">
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-server"/></svg> <a href="/forge/">forge — the homelab</a></h3></div>
     <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
-    <div class="proj-links"><button class="peek-btn" type="button">Peek at the live dashboard →</button></div>
+    <div class="proj-links"><a href="/forge/">See how it's wired + the live dashboard →</a></div>
   </article>
 
   <article class="card peek-card" data-peek="router">
@@ -437,8 +437,6 @@
       capEl=fm.querySelector('.fm-cap'), closeBtn=fm.querySelector('.fm-close');
   var S3='https://s3.kardol.us/kardol-photos/v1', lastFocus=null;
   var PEEKS={
-    forge:{img:S3+'/forge/forge-dashboard.webp', url:'grafana.kardol.us', alt:'forge cluster Grafana dashboard: HEALTHY app boxes, CPU/memory/disk gauges, per-host ingress request rate.',
-      cap:'forge — the basement Kubernetes node serving this page, watching itself. See that <b>kardol.us&nbsp;req/s</b> line in the ingress chart? Your visit is in it.'},
     router:{img:S3+'/router/router-dashboard.webp', url:'router.internal', alt:'OPNsense dashboard: system info, gateways, interface and firewall statistics, traffic graphs.',
       cap:'The OPNsense box guarding the house — network-wide ad-blocking, WireGuard, and per-device VPN exits. Yes, the Apple&nbsp;TV really does stream from <b>Berlin</b>.'}
   };
