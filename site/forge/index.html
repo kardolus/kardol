@@ -454,28 +454,48 @@
 // Screenshots of the Grafana home board, re-rendered every 5 min inside the cluster
 // (desktop grid + phone column, light + dark). meta.json says when; its timestamp
 // cache-busts the images because Cloudflare holds them for hours otherwise.
+// While the page is open it re-checks meta.json every minute (and on returning to the
+// tab), preloads a newer render off-screen, then swaps it in so the image never flashes.
 (function(){
   var B = 'https://s3.kardol.us/kardol-photos/v1/forge/live/';
   var img = document.getElementById('dash-img'), phone = document.getElementById('dash-src-phone'),
       link = document.getElementById('dash-link'), age = document.getElementById('dash-age');
-  var v = String(Math.floor(Date.now() / 300000)), renderedAt = null;
+  var v = String(Math.floor(Date.now() / 300000)), renderedAt = null, checking = false;
+  function theme(){ return document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
+  function isPhone(){ return matchMedia('(max-width: 640px)').matches; }
+  function url(kind, ver){ return B + 'forge-' + kind + '-' + theme() + '.webp?v=' + ver; }
   function apply(){
-    var t = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-    img.src = B + 'forge-desktop-' + t + '.webp?v=' + v;
-    phone.srcset = B + 'forge-phone-' + t + '.webp?v=' + v;
-    link.href = (matchMedia('(max-width: 640px)').matches ? B + 'forge-phone-' : B + 'forge-desktop-') + t + '.webp?v=' + v;
+    img.src = url('desktop', v);
+    phone.srcset = url('phone', v);
+    link.href = url(isPhone() ? 'phone' : 'desktop', v);
   }
   function tick(){
     if (!renderedAt) return;
     var m = Math.round((Date.now() - renderedAt) / 60000);
-    age.textContent = m < 1 ? 'rendered just now' : 'rendered ' + m + ' min ago';
+    age.textContent = m < 1 ? 'rendered just now'
+      : m < 90 ? 'rendered ' + m + ' min ago'
+      : 'rendered ' + Math.round(m / 60) + ' h ago';
     age.classList.toggle('stale', m > 20);
+  }
+  function check(){
+    if (checking) return;
+    checking = true;
+    fetch(B + 'meta.json?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(m){
+      var at = Date.parse(m.rendered_at);
+      if (!at || at === renderedAt) { checking = false; tick(); return; }
+      var ver = String(at), pre = new Image();
+      var swap = function(){ renderedAt = at; v = ver; apply(); tick(); checking = false; };
+      pre.onload = swap;
+      pre.onerror = function(){ checking = false; };   // keep the old frame; retry next minute
+      pre.src = url(isPhone() ? 'phone' : 'desktop', ver);
+    }).catch(function(){ checking = false; });
   }
   window.setDashTheme = apply;
   apply();
-  fetch(B + 'meta.json?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(m){
-    renderedAt = Date.parse(m.rendered_at); v = String(renderedAt); apply(); tick(); setInterval(tick, 30000);
-  }).catch(function(){});
+  check();
+  setInterval(tick, 30000);
+  setInterval(function(){ if (!document.hidden) check(); }, 60000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) check(); });
 })();
 </script>
 </body>
