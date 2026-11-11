@@ -249,11 +249,13 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 
 /* language-codes KPI value (smaller than the numeric kpi-n so EN · NL · ES fits) */
 .kpi-n.kpi-codes{font-size:18px;letter-spacing:.01em}
-/* titles that open a page: normal title colour plus an accent arrow, so they read as links on
-   touch screens too; on hover the title goes accent and the arrow nudges right */
-.proj-head h3 a,.forge-flag h2 a{color:inherit}
+/* titles that open a page get an accent arrow that nudges on hover; grid-card titles are also green
+   (forge's big flagship title stays the normal colour) */
+.forge-flag h2 a{color:inherit}
+.proj-head h3 a{color:var(--accent)}   /* grid cards: green like every other link on the site */
 .proj-head h3 a::after,.forge-flag h2 a::after{content:"→";display:inline-block;margin-left:7px;color:var(--accent);
   transition:transform .15s}
-.proj-head h3 a:hover,.forge-flag h2 a:hover{color:var(--accent);text-decoration:none}
+.forge-flag h2 a:hover{color:var(--accent);text-decoration:none}
+.proj-head h3 a:hover{text-decoration:underline;text-underline-offset:3px}
 .proj-head h3 a:hover::after,.forge-flag h2 a:hover::after{transform:translateX(3px)}
 @media (prefers-reduced-motion:reduce){.proj-head h3 a::after,.forge-flag h2 a::after{transition:none}}
