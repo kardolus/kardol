@@ -27,7 +27,7 @@ spec:
         - name: ghcr-pull
       containers:
         - name: kardol-web
-          image: ghcr.io/kardolus/kardol-web:v75
+          image: ghcr.io/kardolus/kardol-web:v76
           imagePullPolicy: IfNotPresent
           ports:
             - {containerPort: 80, name: http}
