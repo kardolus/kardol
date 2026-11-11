@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=26">
+<link rel="stylesheet" href="/style.css?v=27">
 <link rel="stylesheet" href="/retro.css?v=2">
 <script>
   // apply saved theme before paint to avoid a flash
@@ -30,6 +30,7 @@
   function toggleDark(){
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    if (window.setForgeThumb) window.setForgeThumb();
   }
   // 90s mode: apply the class before paint too. ?retro=1 / ?retro=0 override the saved pref.
   (function(){
@@ -45,6 +46,29 @@
 </script>
 <script defer src="https://analytics.kardol.us/script.js" data-website-id="315018e0-6e4e-4916-bc46-55ad40b65df6"></script>
 <script defer src="/retro.js?v=2"></script>
+<script>
+// forge flagship thumbnail: the latest 5-minute render of the cluster's Grafana board
+// (same images as /forge/), cache-busted by meta.json's rendered_at.
+(function(){
+  var B = 'https://s3.kardol.us/kardol-photos/v1/forge/live/', v = String(Math.floor(Date.now() / 300000)), at = null;
+  function set(){
+    var img = document.getElementById('forge-thumb'); if (!img) return;
+    img.src = B + 'forge-desktop-' + (document.documentElement.classList.contains('dark') ? 'dark' : 'light') + '.webp?v=' + v;
+  }
+  function label(){
+    var el = document.getElementById('forge-age'); if (!el || !at) return;
+    var m = Math.round((Date.now() - at) / 60000);
+    el.textContent = m < 1 ? 'live · just now' : m < 90 ? 'live · ' + m + ' min ago' : 'live · ' + Math.round(m / 60) + ' h ago';
+  }
+  window.setForgeThumb = set;
+  document.addEventListener('DOMContentLoaded', function(){
+    set();
+    fetch(B + 'meta.json?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(m){
+      at = Date.parse(m.rendered_at); if (at) { v = String(at); set(); label(); setInterval(label, 30000); }
+    }).catch(function(){});
+  });
+})();
+</script>
 </head>
 <body>
 
@@ -107,7 +131,7 @@
   <span><b>Currently</b> in Red Hook, Brooklyn — building <a href="https://apps.apple.com/us/app/nemo-places/id6762070377">Nemo&nbsp;Places</a> and a self-hosted homelab; baking sourdough, sailing the harbor, and running the waterfront.</span></p>
 
 <!-- FLAGSHIP -->
-<div class="section" id="flagship">Flagship</div>
+<div class="section" id="flagship">Flagships</div>
 <article class="card flagship">
   <div class="body">
     <div class="eyebrow">open source</div>
@@ -120,6 +144,26 @@
     </div>
   </div>
   <div class="flag-kpi"><div class="n" id="stars-flag">937★</div><div class="l">GitHub stars</div></div>
+</article>
+
+<article class="card flagship forge-flag">
+  <div class="body">
+    <div class="eyebrow">self-hosted infrastructure</div>
+    <h2><svg class="proj-icon" aria-hidden="true"><use href="#i-server"/></svg> <a href="/forge/">forge — my own Kubernetes cluster</a></h2>
+    <p>One Dell tower in my basement running vanilla kubeadm Kubernetes, and every site I've built, this one included. It sits behind Cloudflare tunnels with no web ports open, puts private apps behind one Keycloak SSO, pages me through PagerDuty with a dead-man's switch for when the box itself goes dark, and keeps 3&#8209;2&#8209;1 backups offsite.</p>
+    <div class="forge-stats">
+      <div><b>~40</b><span>sites</span></div>
+      <div><b>68</b><span>deployments</span></div>
+      <div><b>20</b><span>Postgres DBs</span></div>
+      <div><b>250+</b><span>alert rules</span></div>
+    </div>
+    <div class="proj-links"><a href="/forge/">See how it's wired</a></div>
+  </div>
+  <a class="forge-thumb" href="/forge/#live" aria-label="forge's live Grafana dashboard">
+    <img id="forge-thumb" src="https://s3.kardol.us/kardol-photos/v1/forge/live/forge-desktop-light.webp" width="1440" height="662" loading="lazy" decoding="async"
+      alt="forge's Grafana home board: green health boxes, CPU, memory and disk gauges, and traffic charts.">
+    <span class="forge-live" id="forge-age">live dashboard</span>
+  </a>
 </article>
 
 <!-- PROJECTS -->
@@ -217,13 +261,6 @@
     <p>Local CLI wrappers for driving the Comet browser from the terminal — so an AI agent can read and act on real pages.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>Python</span><span class="tag">tooling</span></div>
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
-  </article>
-
-  <article class="card">
-    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-server"/></svg> <a href="/forge/">forge — the homelab</a></h3></div>
-    <p>A single-node Kubernetes cluster in my basement running my apps, Prometheus/Grafana monitoring, S3-compatible storage, and SSO. This site is served from it.</p>
-    <div class="tags"><span class="tag"><span class="dot"></span>k8s</span><span class="tag">self-hosted</span></div>
-    <div class="proj-links"><a href="/forge/">See how it's wired + the live dashboard →</a></div>
   </article>
 
   <article class="card peek-card" data-peek="router">

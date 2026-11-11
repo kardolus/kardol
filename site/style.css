@@ -104,6 +104,25 @@ html.dark .btn.primary{color:#0d1117}
 .flag-kpi{text-align:center;padding:10px 18px;border-radius:var(--radius-md);background:var(--accent-soft);min-width:120px}
 .flag-kpi .n{font-family:var(--font-ui);font-size:34px;font-weight:700;color:var(--accent);line-height:1}
 .flag-kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--meta);margin-top:4px}
+/* forge flagship: pitch + stats on the left, live dashboard thumbnail on the right */
+.forge-flag{margin-top:16px;align-items:stretch}
+.forge-flag h2 a{color:var(--fg)}
+.forge-flag h2 a:hover{color:var(--accent);text-decoration:none}
+.forge-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 4px}
+.forge-stats div{border-radius:var(--radius-sm);background:var(--accent-soft);padding:8px 6px;text-align:center}
+.forge-stats b{display:block;font-family:var(--font-ui);font-size:22px;line-height:1.1;color:var(--accent)}
+.forge-stats span{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--meta)}
+.forge-thumb{position:relative;flex:0 1 380px;min-width:240px;align-self:center;display:block;border:1px solid var(--border);
+  border-radius:var(--radius-md);overflow:hidden;background:var(--bg);transition:transform .15s,border-color .15s}
+.forge-thumb:hover{transform:translateY(-2px);border-color:var(--accent)}
+.forge-thumb img{display:block;width:100%;height:auto}
+.forge-live{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);
+  font-size:11px;color:var(--fg);background:color-mix(in srgb,var(--bg) 85%,transparent);border:1px solid var(--border);
+  border-radius:999px;padding:2px 9px}
+.forge-live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);animation:forge-pulse 2s infinite}
+@keyframes forge-pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.forge-live::before{animation:none}.forge-thumb{transition:none}}
+@media(max-width:560px){.forge-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.forge-thumb{flex-basis:100%}}
 .eyebrow{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px}
 
 /* project cards: header + tags + links */
