@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The home router</title>
+<meta name="description" content="Guillermo Kardolus's OPNsense home router: network-wide ad blocking, encrypted DNS that can't be bypassed, a VPN country per device, and a road-warrior VPN home with no DNS leaks.">
+<meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="The home router">
+<meta property="og:description" content="Network-wide ad blocking, encrypted DNS, a VPN country per device, and a way home from anywhere — on one small OPNsense box.">
+<meta property="og:image" content="https://kardol.us/img/og.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=28">
+<script>
+  var _t; try { _t = localStorage.getItem('theme'); } catch (e) {}
+  document.documentElement.classList.toggle('dark', _t ? _t === 'dark' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches));
+  function toggleDark(){
+    var dark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+  }
+</script>
+<script defer src="https://analytics.kardol.us/script.js" data-website-id="315018e0-6e4e-4916-bc46-55ad40b65df6"></script>
+<style>
+  :root{--blk:#c0392b;--vpn:#6a55d8;--blk-soft:#c0392b12;--vpn-soft:#6a55d814}
+  html.dark{--blk:#f0796a;--vpn:#a493ff;--blk-soft:#f0796a14;--vpn-soft:#a493ff17}
+  .crumb{font-family:var(--font-ui);font-size:14px;color:var(--meta)}
+  .crumb a{color:var(--meta)} .crumb a:hover{color:var(--fg)}
+  .fhero{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);padding:28px 28px 24px;margin:14px 0 18px}
+  .fhero h1{font-size:clamp(28px,5vw,40px);letter-spacing:-.01em}
+  .fhero .lede{font-size:17px;max-width:720px;margin:10px 0 0}
+  .fhero .sub{color:var(--meta);font-size:14px;margin-top:8px;max-width:720px}
+  .fkpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:20px}
+  .fkpis .kpi{padding:12px 14px}
+  .fkpis .kpi-n{font-size:26px}
+  .asof{font-size:12px;color:var(--meta);margin-top:10px}
+  h2.sh{font-size:22px;margin:40px 0 6px}
+  .sh-sub{color:var(--meta);margin:0 0 16px;max-width:760px}
+  .specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .spec{border:1px solid var(--border);border-radius:var(--radius-md);background:var(--card);padding:16px 18px}
+  .spec h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--meta);margin-bottom:8px}
+  .spec dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:14px}
+  .spec dt{color:var(--meta);white-space:nowrap}
+  .spec dd{margin:0;min-width:0}
+  /* flows: a row of hops with arrows; wraps to a column on phones */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:6px 0 10px}
+  .hop{flex:1 1 150px;min-width:0;border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--card);padding:10px 12px}
+  .hop b{display:block;font-family:var(--font-ui);font-size:14px;margin-bottom:2px}
+  .hop span{display:block;font-size:13px;color:var(--meta);line-height:1.45}
+  .hop.blk{border-color:var(--blk);background:var(--blk-soft)}
+  .hop.vpn{border-color:var(--vpn);background:var(--vpn-soft)}
+  .hop.ok{border-color:var(--accent);background:var(--accent-soft)}
+  .arr{flex:0 0 26px;display:flex;align-items:center;justify-content:center;color:var(--border-strong);font-size:18px}
+  @media(max-width:700px){.flow{flex-direction:column}.hop{flex:0 0 auto}.arr{flex-basis:22px;transform:rotate(90deg)}}
+  .story{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);padding:18px;margin-bottom:14px}
+  .story h3{font-size:17px;margin-bottom:2px}
+  .story .meta{margin-bottom:12px}
+  .note{font-size:14px;color:var(--meta);margin:4px 0 0;max-width:760px}
+  .note b{color:var(--fg)}
+  .side{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px}
+  .box{border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--card);padding:10px 12px;min-width:0}
+  .box h4{font-family:var(--font-ui);font-size:14px;margin:0 0 3px}
+  .box p{margin:0;font-size:13px;color:var(--meta);line-height:1.45}
+  .shot{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--card);margin:0}
+  .shot-bar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:12px;color:var(--meta)}
+  .shot img{display:block;width:100%;height:auto}
+  .shot figcaption{padding:10px 14px;font-size:13px;color:var(--meta);border-top:1px solid var(--border)}
+  .foot{margin-top:48px}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="compass" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.6l1.9 8.5 8.5 1.9-8.5 1.9-1.9 8.5-1.9-8.5-8.5-1.9 8.5-1.9z"/></symbol>
+</svg>
+
+<header class="top-bar">
+  <div class="brand"><a href="/" style="display:flex;align-items:center;gap:9px;color:var(--fg)"><svg class="logo"><use href="#compass"/></svg> Guillermo Kardolus</a></div>
+  <div class="top-actions">
+    <nav class="top-nav">
+      <a href="#box">The box</a>
+      <a href="#dns">Ad blocking</a>
+      <a href="#vpn">VPN exits</a>
+      <a class="always" href="#away">Away</a>
+    </nav>
+    <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+  </div>
+</header>
+
+<div class="crumb"><a href="/">kardol.us</a> / router</div>
+
+<section class="fhero">
+  <h1>The home router</h1>
+  <p class="lede">A small OPNsense box that every packet in the house goes through. It strips out ads and trackers for every device at once, encrypts every DNS lookup, lets me choose which country each device appears to be in, and brings me home from anywhere.</p>
+  <p class="sub">It also sits in front of <a href="/forge/">forge</a>, the basement Kubernetes cluster, and is how I reach it when I'm out.</p>
+  <div class="fkpis">
+    <div class="kpi"><div class="kpi-n">~410k</div><div class="kpi-l">block rules</div></div>
+    <div class="kpi"><div class="kpi-n">~1 in 11</div><div class="kpi-l">lookups blocked</div></div>
+    <div class="kpi"><div class="kpi-n">100%</div><div class="kpi-l">DNS encrypted upstream</div></div>
+    <div class="kpi"><div class="kpi-n">2</div><div class="kpi-l">VPN countries on tap</div></div>
+    <div class="kpi"><div class="kpi-n">0</div><div class="kpi-l">port forwards</div></div>
+    <div class="kpi"><div class="kpi-n">4 mo</div><div class="kpi-l">since last reboot</div></div>
+  </div>
+  <div class="asof">Numbers as of November 2026.</div>
+</section>
+
+<!-- THE BOX -->
+<h2 class="sh" id="box">The box</h2>
+<p class="sh-sub">A low-power mini PC with four network ports. It draws about as much as a light bulb and idles at a few percent CPU.</p>
+<div class="specs">
+  <div class="spec">
+    <h3>Hardware</h3>
+    <dl>
+      <dt>CPU</dt><dd>Intel Celeron N5105, 4 cores</dd>
+      <dt>Memory</dt><dd>8 GB</dd>
+      <dt>Network</dt><dd>4 × Intel 2.5 GbE</dd>
+    </dl>
+  </div>
+  <div class="spec">
+    <h3>Software</h3>
+    <dl>
+      <dt>OS</dt><dd>OPNsense 26.1 (FreeBSD)</dd>
+      <dt>Blocking</dt><dd>AdGuard Home</dd>
+      <dt>Resolver</dt><dd>Unbound: DNS-over-TLS, DNSSEC</dd>
+      <dt>Tunnels</dt><dd>WireGuard, Tailscale</dd>
+      <dt>DHCP</dt><dd>Kea</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- DNS -->
+<h2 class="sh" id="dns">Ad blocking, for every device at once</h2>
+<p class="sh-sub">No browser extensions, no per-device apps. The TV, the phones, the guests' laptops: everything that joins the network gets the same filtering, because everything asks the router for directions.</p>
+<div class="story">
+  <h3>A DNS lookup's journey</h3>
+  <div class="meta">what happens when anything in the house looks up a name</div>
+  <div class="flow">
+    <div class="hop"><b>A device asks</b><span>"Where is ads.example.com?" DHCP told every device to ask the router.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop blk"><b>AdGuard checks</b><span>~410k rules for ads, trackers and malware. A match gets a dead end, and the ad never loads.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop"><b>Unbound resolves</b><span>Everything else goes to the local resolver, which caches answers and checks DNSSEC signatures.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop ok"><b>Encrypted upstream</b><span>Only cache misses leave the house, over DNS-over-TLS. The internet provider sees none of it.</span></div>
+  </div>
+  <p class="note">On a normal evening about <b>one lookup in eleven</b> is something the house didn't want: an ad, a tracker, telemetry.</p>
+</div>
+<div class="side">
+  <div class="box"><h4>No side doors</h4><p>Some devices try to skip local DNS with their own encrypted resolver. The firewall blocks DNS-over-TLS out of the house, so they fall back to the router and get filtered like everything else.</p></div>
+  <div class="box"><h4>Safe Browsing on</h4><p>Known phishing and malware domains are blocked for everyone, on top of the ad and tracker lists.</p></div>
+</div>
+
+<!-- VPN -->
+<h2 class="sh" id="vpn">A country per device</h2>
+<p class="sh-sub">Any device in the house can be sent out through a VPN exit in another country, while everything else uses the normal connection. No VPN app on the device; the device doesn't even know.</p>
+<div class="story">
+  <h3>Picking a country for one device</h3>
+  <div class="meta">policy routing: the router decides the exit, not the device</div>
+  <div class="flow">
+    <div class="hop"><b>A list per country</b><span>Each exit has a named list of devices: one for Amsterdam, one for Berlin.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop vpn"><b>A firewall rule routes it</b><span>Traffic from a device on a list is sent down that country's tunnel instead of the normal internet.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop vpn"><b>WireGuard to Mullvad</b><span>A WireGuard tunnel to Mullvad carries it, with its own address translation on the way out.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop ok"><b>It's "in Berlin"</b><span>Websites see a Berlin address. Moving a device between countries means editing a list.</span></div>
+  </div>
+  <p class="note">Yes, the Apple&nbsp;TV really does stream from <b>Berlin</b>.</p>
+</div>
+
+<!-- AWAY -->
+<h2 class="sh" id="away">Home, from anywhere</h2>
+<p class="sh-sub">The router runs a WireGuard server for the family's phones and laptops. Away from home, they connect back and behave as if they never left.</p>
+<div class="story">
+  <h3>Away from home</h3>
+  <div class="meta">a phone on hotel Wi-Fi or a cell network</div>
+  <div class="flow">
+    <div class="hop"><b>Phone connects</b><span>WireGuard tunnels home over whatever network it's on. Nothing else on the router is reachable from outside.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop blk"><b>Home DNS</b><span>Lookups go through the tunnel to AdGuard, so ads are blocked on the road too.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop ok"><b>No DNS leaks</b><span>The hotel network never sees a lookup: they're inside the tunnel, then encrypted again on the way out.</span></div>
+    <div class="arr" aria-hidden="true">→</div>
+    <div class="hop"><b>The LAN is right there</b><span>Photos back up to forge directly, which skips Cloudflare's size limits for big videos.</span></div>
+  </div>
+</div>
+<div class="side">
+  <div class="box"><h4>Tailscale too</h4><p>The router is also a Tailscale node that routes to the home network. That's how I reach forge and the router's own admin from a laptop anywhere.</p></div>
+  <div class="box"><h4>Nothing else open</h4><p>The websites in the house reach the internet through Cloudflare tunnels that dial out. The router forwards no ports at all. The only thing listening is WireGuard, which ignores anyone without a key.</p></div>
+</div>
+
+<!-- PLUMBING -->
+<h2 class="sh" id="plumbing">The quiet plumbing</h2>
+<div class="side">
+  <div class="box"><h4>DHCP with reservations</h4><p>Kea hands out addresses and pins forge's, after a power cut once let the printer grab it and took the whole cluster down.</p></div>
+  <div class="box"><h4>Backed up nightly</h4><p>forge pulls the router's configuration (with its full revision history) every night into the same encrypted backups that go offsite.</p></div>
+  <div class="box"><h4>Learned the hard way</h4><p>A hand-installed service once ran in the foreground at boot, so the router never finished starting: no DHCP, no cron. It now runs supervised in the background, and a test reboot proved it.</p></div>
+</div>
+
+<!-- SCREENSHOT -->
+<h2 class="sh" id="dashboard">The dashboard</h2>
+<figure class="shot">
+  <div class="shot-bar">router · OPNsense</div>
+  <img src="https://s3.kardol.us/kardol-photos/v1/router/router-dashboard-v2.webp" width="1800" height="1029" loading="lazy" decoding="async"
+    alt="OPNsense dashboard: system information, memory and disk gauges, gateways including two Mullvad tunnels (addresses hidden), interface and firewall statistics, services, and traffic graphs.">
+  <figcaption>OPNsense's own dashboard, from earlier this year. Addresses are hidden. The two Mullvad gateways are the Amsterdam and Berlin exits.</figcaption>
+</figure>
+
+<footer class="foot" id="contact">
+  <span>Made in Red Hook, Brooklyn · <a href="/forge/">forge</a> · <a href="/">← back to kardol.us</a></span>
+  <span class="links">
+    <a href="https://github.com/kardolus">GitHub</a>
+    <a href="https://www.linkedin.com/in/guillermokardolus/">LinkedIn</a>
+    <a href="mailto:kardol@kardol.us">Email</a>
+  </span>
+</footer>
+
+</body>
+</html>

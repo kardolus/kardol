@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=27">
+<link rel="stylesheet" href="/style.css?v=28">
 <link rel="stylesheet" href="/retro.css?v=2">
 <script>
   // apply saved theme before paint to avoid a flash
@@ -171,6 +171,13 @@
 <div class="grid2">
 
   <article class="card">
+    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-shield"/></svg> <a href="/router/">Home router (OPNsense)</a></h3></div>
+    <p>The box every packet in the house goes through: ad and tracker blocking for every device at once, DNS that's encrypted and can't be bypassed, a VPN country per device (the Apple&nbsp;TV streams from Berlin), and a WireGuard way home from anywhere.</p>
+    <div class="tags"><span class="tag"><span class="dot"></span>OPNsense</span><span class="tag">AdGuard</span><span class="tag">WireGuard</span><span class="tag">networking</span></div>
+    <div class="proj-links"><a href="/router/">See how it works</a></div>
+  </article>
+
+  <article class="card">
     <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-pin"/></svg> Nemo Places</h3></div>
     <p>Drop a pin on the spots you love, organize them by emoji, and set time-bound places. It’s local-first: everything works on your device with no account, and you can optionally sign in to sync across your iPhone, iPad, and Mac. Sharing is the best part: send exactly what you see on your screen as a link, and import from or share out to Google Maps, Mapbox, and others. iPhone, iPad, Mac &amp; Android.</p>
     <div class="tags"><span class="tag"><span class="dot"></span>iOS</span><span class="tag"><span class="dot"></span>Mac</span><span class="tag"><span class="dot"></span>Android</span><span class="tag">maps</span><span class="tag">local-first</span></div>
@@ -263,13 +270,6 @@
     <div class="proj-links"><a href="https://github.com/kardolus/comet-cli">GitHub</a></div>
   </article>
 
-  <article class="card peek-card" data-peek="router">
-    <div class="proj-head"><h3><svg class="proj-icon" aria-hidden="true"><use href="#i-shield"/></svg> Home router (OPNsense)</h3></div>
-    <p>A hand-tuned OPNsense box that blocks ads network-wide, makes every device look like it's home over WireGuard, and policy-routes individual devices through different VPN exits — e.g. the Apple TV streaming from Berlin.</p>
-    <div class="tags"><span class="tag"><span class="dot"></span>OPNsense</span><span class="tag">networking</span><span class="tag">VPN</span></div>
-    <div class="proj-links"><button class="peek-btn" type="button">Peek at the dashboard →</button></div>
-  </article>
-
   <article class="card soon-card">
     <span class="pill">coming soon</span>
     <div class="proj-head"><h3><svg class="twinkle" aria-hidden="true"><use href="#compass"/></svg> Polaris</h3></div>
@@ -306,20 +306,6 @@
   <figure class="lb-stage"><img id="lb-img" alt=""><figcaption><span id="lb-cap"></span> <button class="lb-share" id="lb-share" type="button" title="Copy a link to this photo">copy link</button></figcaption></figure>
   <button class="lb-nav lb-next" aria-label="Next photo">›</button>
   <div class="lb-strip" id="lb-strip"></div>
-</div>
-
-<!-- forge dashboard peek: a static screenshot of the cluster's own Grafana, framed
-     in browser chrome. The visitor is literally a data point in the ingress chart. -->
-<div class="fm" id="fm" role="dialog" aria-modal="true" aria-label="forge monitoring dashboard" hidden>
-  <figure class="fm-win">
-    <div class="fm-bar">
-      <span class="fm-dots"><i></i><i></i><i></i></span>
-      <span class="fm-url">grafana.kardol.us</span>
-      <button class="fm-close" aria-label="Close">×</button>
-    </div>
-    <img class="fm-shot" id="fm-img" alt="forge cluster Grafana dashboard: a row of HEALTHY app boxes, CPU / memory / disk gauges, and a per-host ingress request-rate chart.">
-    <figcaption class="fm-cap">forge — the basement Kubernetes node serving this page, watching itself. See that <b>kardol.us&nbsp;req/s</b> line in the ingress chart? Your visit is in it.</figcaption>
-  </figure>
 </div>
 
 <!-- FOOTER -->
@@ -463,33 +449,6 @@
   document.querySelectorAll('a[href]').forEach(function(a){
     if (/^https?:\/\//i.test(a.getAttribute('href') || '')){ a.target = '_blank'; a.rel = 'noopener noreferrer'; }
   });
-})();
-</script>
-
-<script>
-// project tiles tagged data-peek -> modal with a static screenshot of that box's
-// own dashboard, framed in browser chrome. Images live on the public MinIO bucket.
-(function(){
-  var fm=document.getElementById('fm'); if(!fm) return;
-  var img=document.getElementById('fm-img'), urlEl=fm.querySelector('.fm-url'),
-      capEl=fm.querySelector('.fm-cap'), closeBtn=fm.querySelector('.fm-close');
-  var S3='https://s3.kardol.us/kardol-photos/v1', lastFocus=null;
-  var PEEKS={
-    router:{img:S3+'/router/router-dashboard.webp', url:'router.internal', alt:'OPNsense dashboard: system info, gateways, interface and firewall statistics, traffic graphs.',
-      cap:'The OPNsense box guarding the house — network-wide ad-blocking, WireGuard, and per-device VPN exits. Yes, the Apple&nbsp;TV really does stream from <b>Berlin</b>.'}
-  };
-  var others=function(){return Array.prototype.filter.call(document.body.children,function(el){return el!==fm;});};
-  function open(key){ var p=PEEKS[key]; if(!p) return;
-    img.src=p.img; img.alt=p.alt; urlEl.textContent=p.url; capEl.innerHTML=p.cap;
-    lastFocus=document.activeElement; fm.hidden=false;
-    others().forEach(function(el){el.inert=true;}); document.addEventListener('keydown',onKey); closeBtn.focus(); }
-  function close(){ fm.hidden=true; others().forEach(function(el){el.inert=false;});
-    document.removeEventListener('keydown',onKey); if(lastFocus)lastFocus.focus(); }
-  function onKey(e){ if(e.key==='Escape')close(); }
-  document.querySelectorAll('.peek-card').forEach(function(card){
-    card.addEventListener('click',function(){ open(card.dataset.peek); }); });
-  closeBtn.addEventListener('click',function(e){e.stopPropagation();close();});
-  fm.addEventListener('click',function(e){if(e.target===fm)close();});
 })();
 </script>
 

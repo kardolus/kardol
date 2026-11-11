@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=27">
+<link rel="stylesheet" href="/style.css?v=28">
 <script>
   var _t; try { _t = localStorage.getItem('theme'); } catch (e) {}
   document.documentElement.classList.toggle('dark', _t ? _t === 'dark' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches));
@@ -200,7 +200,7 @@
       <dt>Kubernetes</dt><dd>v1.35 via kubeadm</dd>
       <dt>Runtime</dt><dd>containerd 2.2 (its own instance, separate from Docker)</dd>
       <dt>Docker</dt><dd>runs the stateful bits next to the cluster</dd>
-      <dt>Router</dt><dd>OPNsense: AdGuard DNS, WireGuard, Tailscale</dd>
+      <dt>Router</dt><dd><a href="/router/">OPNsense</a>: AdGuard DNS, WireGuard, Tailscale</dd>
     </dl>
   </div>
 </div>
@@ -226,7 +226,7 @@
       </div>
       <div class="box plat">
         <h4><svg width="14" height="14"><use href="#lock"/></svg> Private paths</h4>
-        <p>From the house, or from anywhere over <b>WireGuard</b> (on the OPNsense router) or <b>Tailscale</b>: straight to the LAN. Phone photo backups use this path so big videos skip Cloudflare's upload cap.</p>
+        <p>From the house, or from anywhere over <b>WireGuard</b> (on the <a href="/router/">OPNsense router</a>) or <b>Tailscale</b>: straight to the LAN. Phone photo backups use this path so big videos skip Cloudflare's upload cap.</p>
       </div>
     </div>
   </div>
