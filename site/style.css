@@ -106,8 +106,6 @@ html.dark .btn.primary{color:#0d1117}
 .flag-kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--meta);margin-top:4px}
 /* forge flagship: pitch + stats on the left, live dashboard thumbnail on the right */
 .forge-flag{margin-top:16px;align-items:stretch}
-.forge-flag h2 a{color:var(--fg)}
-.forge-flag h2 a:hover{color:var(--accent);text-decoration:none}
 .forge-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 4px}
 .forge-stats div{border-radius:var(--radius-sm);background:var(--accent-soft);padding:8px 6px;text-align:center}
 .forge-stats b{display:block;font-family:var(--font-ui);font-size:22px;line-height:1.1;color:var(--accent)}
@@ -251,6 +249,11 @@ img.avatar:hover{filter:none;transform:scale(1.03)}
 
 /* language-codes KPI value (smaller than the numeric kpi-n so EN · NL · ES fits) */
 .kpi-n.kpi-codes{font-size:18px;letter-spacing:.01em}
-/* linked card titles read like the others; accent on hover */
-.proj-head h3 a{color:inherit}
-.proj-head h3 a:hover{color:var(--accent);text-decoration:none}
+/* titles that open a page: normal title colour plus an accent arrow, so they read as links on
+   touch screens too; on hover the title goes accent and the arrow nudges right */
+.proj-head h3 a,.forge-flag h2 a{color:inherit}
+.proj-head h3 a::after,.forge-flag h2 a::after{content:"→";display:inline-block;margin-left:7px;color:var(--accent);
+  transition:transform .15s}
+.proj-head h3 a:hover,.forge-flag h2 a:hover{color:var(--accent);text-decoration:none}
+.proj-head h3 a:hover::after,.forge-flag h2 a:hover::after{transform:translateX(3px)}
+@media (prefers-reduced-motion:reduce){.proj-head h3 a::after,.forge-flag h2 a::after{transition:none}}
