@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>forge — the homelab</title>
-<meta name="description" content="How forge, Guillermo Kardolus's basement Kubernetes homelab, is wired: hardware, cluster configuration, every service, how sign-in works, where the data lives — plus its live Grafana dashboard.">
+<meta name="description" content="How forge, Guillermo Kardolus's basement Kubernetes homelab, is wired: hardware, cluster configuration, every service, how sign-in works, where the data lives, the router and the Mac mini that builds the apps — plus its live Grafana dashboard.">
 <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="forge — the homelab">
@@ -127,6 +127,8 @@
   .dash-bar .live.stale{color:var(--warn)} .dash-bar .live.stale::before{background:var(--warn);animation:none}
   .prose{max-width:760px;font-size:15px}
   .prose p{margin:0 0 10px}
+  .dests{display:flex;flex-wrap:wrap;gap:6px}
+  .dest{font-family:var(--font-mono);font-size:12px;border:1px solid var(--border-strong);border-radius:999px;padding:3px 10px;color:var(--fg);background:var(--card)}
   .foot{margin-top:48px}
 </style>
 </head>
@@ -144,11 +146,13 @@
   <div class="brand"><a href="/" style="display:flex;align-items:center;gap:9px;color:var(--fg)"><svg class="logo"><use href="#compass"/></svg> Guillermo Kardolus</a></div>
   <div class="top-actions">
     <nav class="top-nav">
+      <a href="#house">House</a>
       <a href="#hardware">Hardware</a>
       <a href="#map">Map</a>
       <a href="#auth">Sign-in</a>
       <a href="#alerts">Alerts</a>
       <a href="#k8s">Cluster</a>
+      <a href="#builds">Builds</a>
       <a class="always" href="#live">Dashboard</a>
     </nav>
     <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
@@ -170,6 +174,51 @@
     <div class="kpi"><div class="kpi-n">254</div><div class="kpi-l">alert rules</div></div>
   </div>
 </section>
+
+<!-- THE WHOLE HOUSE -->
+<h2 class="sh" id="house">The whole house</h2>
+<p class="sh-sub">forge isn't the only machine in the setup. A router decides what every device in the house can see, and a Mac mini builds the apps. Neither forge nor the Mac mini accepts an inbound connection from the internet: web traffic comes back through tunnels forge dials out, and build jobs are work the Mac mini fetches from GitHub.</p>
+<div class="diagram" role="img" aria-label="The home setup: Cloudflare at the edge, an OPNsense router in front of the house network, and behind it forge (the Kubernetes homelab) and a Mac mini (the build machine), with backups on a cold drive and an encrypted offsite copy.">
+  <div class="layer">
+    <div class="layer-t"><b>Edge</b><span>the internet side</span></div>
+    <div class="row r2">
+      <div class="box plat">
+        <h4><svg width="14" height="14"><use href="#globe"/></svg> Cloudflare</h4>
+        <p>DNS, TLS and the outbound tunnels that carry visitors to the sites on forge. No web port is open at home.</p>
+      </div>
+      <div class="box plat">
+        <h4><svg width="14" height="14"><use href="#cog"/></svg> GitHub</h4>
+        <p>Holds the code and the build queue. The Mac mini and forge each run a runner that asks GitHub for work, so nothing has to reach in.</p>
+      </div>
+    </div>
+  </div>
+  <div class="flow"><svg><use href="#down"/></svg>the house's internet connection</div>
+  <div class="layer">
+    <div class="layer-t"><b>The router</b><span><a href="/router/">its own page →</a></span></div>
+    <div class="box plat">
+      <h4><svg width="14" height="14"><use href="#lock"/></svg> OPNsense</h4>
+      <p>AdGuard DNS blocks ads for every device at once. Any device can be sent out through a VPN exit in a country of its own. WireGuard and Tailscale bring phones and laptops home from anywhere, straight onto the LAN.</p>
+    </div>
+  </div>
+  <div class="flow"><svg><use href="#down"/></svg>the home LAN</div>
+  <div class="layer">
+    <div class="layer-t"><b>The machines</b><span>basement + desk</span></div>
+    <div class="row r3">
+      <div class="box pub">
+        <h4>forge</h4>
+        <p>The Dell tower: a single-node Kubernetes cluster serving about forty sites, their databases and object storage. <a href="#map">The map →</a></p>
+      </div>
+      <div class="box own">
+        <h4>Mac mini</h4>
+        <p>An M4 Pro on the desk and an everyday computer. In a second login session in the background it builds, tests and signs the iPhone, iPad and Mac apps. <a href="#builds">How →</a></p>
+      </div>
+      <div class="box plat">
+        <h4>Backups</h4>
+        <p>Every night: an 8 TB cold drive next to forge, plus an encrypted offsite copy in Cloudflare R2 of everything that can't be recreated.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- HARDWARE -->
 <h2 class="sh" id="hardware">The box</h2>
@@ -424,6 +473,47 @@
       <li>Each night: an etcd snapshot (cluster state, including Secrets) plus PKI and DB dumps into restic, with the critical subset offsite.</li>
       <li>No HA, by choice. When it's down, it pages me, and recovery is a reboot or a documented rebuild.</li>
     </ul>
+  </div>
+</div>
+
+<!-- BUILDS -->
+<h2 class="sh" id="builds">Building the apps</h2>
+<p class="sh-sub">Nemo ships to the App Store, the Mac App Store and Google Play from one GitHub Actions workflow. Xcode only runs on macOS, and GitHub charges about ten times more for a macOS minute than for a Linux one: September 2026's releases cost $184 in macOS minutes alone. So the Apple half now runs on the Mac mini at home.</p>
+<div class="diagram" role="img" aria-label="Build pipeline: a push or a release starts GitHub Actions, which hands the Apple jobs to the Mac mini, the Android and web jobs to GitHub's Linux machines, and bart's deploys to forge; the results go to TestFlight, the Mac App Store, Google Play and the cluster.">
+  <div class="layer">
+    <div class="layer-t"><b>1 · Something lands</b><span>GitHub Actions</span></div>
+    <div class="row r2">
+      <div class="box plat"><h4>A push to main</h4><p>Fast checks: the shared Swift tests, an iOS compile, the Android and web tests.</p></div>
+      <div class="box plat"><h4>A release</h4><p>The full run: simulator tests on iPhone, iPad and iPhone Duo, then signed builds of all three apps.</p></div>
+    </div>
+  </div>
+  <div class="flow"><svg><use href="#down"/></svg>one repository variable decides where each kind of job runs</div>
+  <div class="layer">
+    <div class="layer-t"><b>2 · Who does the work</b><span>runners fetch jobs, nothing reaches in</span></div>
+    <div class="row r3">
+      <div class="box own"><h4>Mac mini</h4><p>Everything that needs Xcode: tests, simulators, archives, code signing. The warm build cache stays on disk between runs.</p></div>
+      <div class="box plat"><h4>GitHub's Linux machines</h4><p>Android tests and the signed Play bundle, plus the website's tests. Cheap enough to leave where they are.</p></div>
+      <div class="box pub"><h4>forge</h4><p>bart's runner: builds its images, backs up and migrates the database, rolls the cluster.</p></div>
+    </div>
+  </div>
+  <div class="flow"><svg><use href="#down"/></svg>uploads</div>
+  <div class="layer">
+    <div class="layer-t"><b>3 · Where it goes</b><span>App Store review is still a separate step</span></div>
+    <div class="dests"><span class="dest">TestFlight → App Store</span><span class="dest">Mac App Store</span><span class="dest">Google Play</span><span class="dest">the forge cluster</span></div>
+  </div>
+</div>
+<div class="specs" style="margin-top:12px">
+  <div class="spec">
+    <h3>Sharing a desk</h3>
+    <p class="meta" style="margin:0">The runner lives in its own unprivileged account, in a background login session, at low CPU and disk priority. Whoever sits at the Mac mini keeps a responsive desktop, and the builds never touch their files.</p>
+  </div>
+  <div class="spec">
+    <h3>Clean every run</h3>
+    <p class="meta" style="margin:0">Each job makes a temporary signing keychain and deletes it afterwards, removes its provisioning profiles, and erases the simulator before the tests boot it, the way a fresh cloud machine would hand it over.</p>
+  </div>
+  <div class="spec">
+    <h3>If the Mac mini is off</h3>
+    <p class="meta" style="margin:0">Changing one setting sends every job back to GitHub's own Macs. Slower to start and paid by the minute, but a release never has to wait for the house.</p>
   </div>
 </div>
 
