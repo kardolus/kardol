@@ -491,7 +491,7 @@
   <div class="layer">
     <div class="layer-t"><b>2 · Who does the work</b><span>runners fetch jobs, nothing reaches in</span></div>
     <div class="row r3">
-      <div class="box own"><h4>Mac mini</h4><p>Everything that needs Xcode: tests, simulators, archives, code signing. The warm build cache stays on disk between runs.</p></div>
+      <div class="box own"><h4>Mac mini · 2 runners</h4><p>Everything that needs Xcode: tests, simulators, archives, code signing. Two runners take two jobs at once (the iPhone tests on one, the iPad, iPhone Duo and Mac jobs on the other), so a full release takes about 25 minutes. The warm build cache stays on disk between runs.</p></div>
       <div class="box plat"><h4>GitHub's Linux machines</h4><p>Android tests and the signed Play bundle, plus the website's tests. Cheap enough to leave where they are.</p></div>
       <div class="box pub"><h4>forge</h4><p>bart's runner: builds its images, backs up and migrates the database, rolls the cluster.</p></div>
     </div>
@@ -505,7 +505,7 @@
 <div class="specs" style="margin-top:12px">
   <div class="spec">
     <h3>Sharing a desk</h3>
-    <p class="meta" style="margin:0">The runner lives in its own unprivileged account, in a background login session, at low CPU and disk priority. Whoever sits at the Mac mini keeps a responsive desktop, and the builds never touch their files.</p>
+    <p class="meta" style="margin:0">Both runners live in their own unprivileged account, in a background login session, at low CPU and disk priority. Whoever sits at the Mac mini keeps a responsive desktop, and the builds never touch their files. Two is the limit: a third would sit idle behind the iPhone tests and cost memory the desktop needs.</p>
   </div>
   <div class="spec">
     <h3>Clean every run</h3>
